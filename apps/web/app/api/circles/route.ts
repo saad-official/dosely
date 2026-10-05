@@ -19,7 +19,10 @@ export async function POST(request: Request) {
   }
 }
 
-/** GET: `{ circles }`, every circle the caller owns or cares for, with members. */
+/**
+ * GET: `{ circles }`, every circle the caller owns or cares for, with members,
+ * the owner's account name (`ownerName`) and `createdAt`.
+ */
 export async function GET(request: Request) {
   try {
     const user = await requireUser(request);

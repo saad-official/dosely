@@ -12,6 +12,8 @@ export type CircleRole = 'member' | 'caregiver';
 export type CircleMemberView = { userId: string; name: string; role: CircleRole; joinedAt: string };
 export type CircleView = {
   id: string;
+  /** The owner's account name (Better Auth `user.name`); missing from caches written by older builds. */
+  ownerName: string;
   isOwner: boolean;
   role: CircleRole;
   /** Only the owner sees (and shares) the code. */
@@ -33,7 +35,17 @@ export type TodayDose = {
 };
 export type TodayProfile = { id: string; name: string; color: string; doses: TodayDose[] };
 export type TodayMember = { userId: string; name: string; profiles: TodayProfile[] };
-export type CircleTodayView = { circleId: string; date: string; timeZone: string; generatedAt: string; members: TodayMember[] };
+export type CircleTodayView = {
+  circleId: string;
+  /** The circle owner's account name (Better Auth `user.name`). */
+  ownerName: string;
+  /** When the circle was created (ISO). */
+  createdAt: string;
+  date: string;
+  timeZone: string;
+  generatedAt: string;
+  members: TodayMember[];
+};
 
 export type CircleState = {
   circles: CircleView[];

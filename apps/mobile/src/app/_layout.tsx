@@ -11,7 +11,6 @@ import { PrimaryButton } from '@/components/primary-button';
 import { showToast, ToastHost } from '@/components/toast';
 import { icons } from '@/constants/icons';
 import { ensureDatabaseReady, useDatabaseMigrations } from '@/data';
-import { restoreAppearance } from '@/hooks/use-appearance';
 import { useSettings } from '@/hooks/use-settings';
 import { haptics } from '@/native/haptics';
 import { addStatusActionListener } from '@/native/live-status';
@@ -35,9 +34,8 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!ready) return;
-    if (db.success) restoreAppearance();
     SplashScreen.hideAsync().catch(() => undefined);
-  }, [ready, db.success]);
+  }, [ready]);
 
   if (db.error) {
     return (

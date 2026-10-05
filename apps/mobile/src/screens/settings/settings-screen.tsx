@@ -1,3 +1,4 @@
+import type { Appearance } from '@dosely/shared';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -12,11 +13,10 @@ import { SectionHeader } from '@/components/section-header';
 import { SegmentedControl } from '@/components/segmented-control';
 import { InfoPill } from '@/components/state-pill';
 import { showToast } from '@/components/toast';
-import { formatHhmm, initialOf } from '@/constants/format';
+import { formatHhmm } from '@/constants/format';
 import { icons } from '@/constants/icons';
 import { links, MEDICAL_DISCLAIMER } from '@/constants/links';
-import { deleteAllLocalData, seedDemoData, signOutAndForget } from '@/data';
-import { setAppearance, useAppearance, type AppearancePreference } from '@/hooks/use-appearance';
+import { deleteAllLocalData, seedDemoData, signOutAndForget, updateSettings } from '@/data';
 import { useNotificationPermission } from '@/hooks/use-notification-permission';
 import { useProfiles } from '@/hooks/use-profiles';
 import { useSession } from '@/hooks/use-session';
@@ -36,11 +36,11 @@ const APPEARANCE = [
   { value: 'dark', label: 'Dark' },
 ] as const;
 
-function ProfileAvatar({ name, color }: { name: string; color: string }) {
+function ProfileAvatar({ initial, color }: { initial: string; color: string }) {
   return (
     <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: medColorHex(color), alignItems: 'center', justifyContent: 'center' }}>
       <AppText variant="callout" weight="700" maxFontSizeMultiplier={1.3} style={{ color: onSwatch }}>
-        {initialOf(name)}
+        {initial}
       </AppText>
     </View>
   );
@@ -53,7 +53,6 @@ function open(url: string) {
 export function SettingsScreen() {
   const profiles = useProfiles();
   const settings = useSettings();
-  const appearance = useAppearance();
   const permission = useNotificationPermission();
   const { data: session } = useSession();
   const [exporting, setExporting] = useState(false);
@@ -117,7 +116,7 @@ export function SettingsScreen() {
               key={p.id}
               title={p.name}
               subtitle={p.isSelf ? 'You' : undefined}
-              leading={<ProfileAvatar name={p.name} color={p.color} />}
+              leading={<ProfileAvatar initial={p.initial} color={p.color} />}
               onPress={() => router.push({ pathname: '/profile-editor', params: { id: p.id } })}
             />
           ))}
@@ -135,8 +134,8 @@ export function SettingsScreen() {
         <SegmentedControl
           accessibilityLabel="Appearance"
           options={APPEARANCE}
-          value={appearance}
-          onChange={(v: AppearancePreference) => setAppearance(v)}
+          value={settings.appearance}
+          onChange={(appearance: Appearance) => void updateSettings({ appearance }).catch(() => undefined)}
         />
       </View>
 

@@ -1,3 +1,4 @@
+import { timeLeftLabel } from '@dosely/shared';
 import { View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -8,7 +9,6 @@ import { PrimaryButton } from '@/components/primary-button';
 import { icons } from '@/constants/icons';
 import type { DoseView } from '@/data';
 import { formatClock } from '@/data';
-import { timeLeftLabel } from '@/native/live-status.types';
 import { spacing, useTheme } from '@/theme';
 
 import { snoozeAll, takeAll } from './dose-actions';

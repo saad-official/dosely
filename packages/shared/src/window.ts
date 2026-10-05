@@ -95,3 +95,17 @@ export function activeWindow(doses: readonly Dose[], now: IsoString): ActiveWind
     total: inWindow.length,
   };
 }
+
+/**
+ * Time left in a dose window for the Live Activity / Live Update and the "due now" card: whole
+ * minutes rounded up, "35 min left", "1 h 05 min left", "2 h left"; "ends now" at or after the end.
+ */
+export function timeLeftLabel(endsAt: IsoString, now: IsoString | number = Date.now()): string {
+  const t = typeof now === "number" ? now : ms(now);
+  const minutes = Math.ceil((ms(endsAt) - t) / MINUTE);
+  if (minutes <= 0) return "ends now";
+  if (minutes < 60) return `${minutes} min left`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m ? `${h} h ${String(m).padStart(2, "0")} min left` : `${h} h left`;
+}

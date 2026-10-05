@@ -1,5 +1,5 @@
 // Profiles: the user ("self") and dependents. Soft deletes (`deletedAt`) so circles sync them.
-import { MED_COLOR_NAMES, type MedColor, type Profile, ProfileSchema } from '@dosely/shared';
+import { initialFor, MED_COLOR_NAMES, type MedColor, type Profile, ProfileSchema } from '@dosely/shared';
 import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 
 import { db } from './db';
@@ -8,9 +8,8 @@ import { profiles } from './schema';
 import { notifyTables } from './store';
 import { nowIso } from './time';
 
+/** `initial` defaults to `initialFor(name)`; `color` to the next palette colour. */
 export type ProfileInput = { name: string; color?: MedColor; initial?: string; isSelf?: boolean };
-
-const initialOf = (name: string) => (name.trim()[0] ?? '?').toUpperCase();
 
 /** Live profiles, self first, then by creation. */
 export function listProfiles(): Profile[] {
@@ -43,7 +42,7 @@ export function createProfile(input: ProfileInput): Profile {
     id: newId(),
     name: input.name,
     color: input.color ?? MED_COLOR_NAMES[listProfiles().length % MED_COLOR_NAMES.length],
-    initial: input.initial ?? initialOf(input.name),
+    initial: input.initial ?? initialFor(input.name),
     isSelf: input.isSelf ?? false,
     createdAt: at,
     updatedAt: at,
@@ -54,18 +53,21 @@ export function createProfile(input: ProfileInput): Profile {
   return profile;
 }
 
-/** The "self" profile, created on first call (onboarding). */
+/** The "self" profile, created on first call (onboarding); its initial comes from `name`. */
 export function ensureSelfProfile(name = 'Me'): Profile {
   return getSelfProfile() ?? createProfile({ name, isSelf: true });
 }
 
-export function updateProfile(id: string, patch: Partial<Pick<Profile, 'name' | 'color' | 'initial'>>): Profile {
+export type ProfilePatch = Partial<Pick<Profile, 'name' | 'color' | 'initial'>>;
+
+/** A new `name` without an explicit `initial` re-derives it (`initialFor`). */
+export function updateProfile(id: string, patch: ProfilePatch): Profile {
   const current = getProfile(id);
   if (!current) throw new Error(`Profile ${id} not found`);
   const next = ProfileSchema.parse({
     ...current,
     ...patch,
-    initial: patch.initial ?? (patch.name ? initialOf(patch.name) : current.initial),
+    initial: patch.initial ?? (patch.name ? initialFor(patch.name) : current.initial),
     updatedAt: nowIso(),
   });
   db.update(profiles).set(fromProfile(next)).where(eq(profiles.id, id)).run();

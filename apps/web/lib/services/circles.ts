@@ -3,7 +3,7 @@ import { and, asc, count, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { ApiError } from "@/app/api/_lib/respond";
 import type { Db } from "@/lib/db/client";
-import { circleMembers, circles, doses, escalations, medications, profiles, type CircleRole } from "@/lib/db/schema";
+import { circleMembers, circles, doses, escalations, medications, profiles, user, type CircleRole } from "@/lib/db/schema";
 
 /**
  * Caregiver circles. The owner is the person whose doses are shared (role
@@ -60,6 +60,8 @@ export const joinCircleSchema = z.object({
 export type CircleMemberView = { userId: string; name: string; role: CircleRole; joinedAt: string };
 export type CircleView = {
   id: string;
+  /** The owner's account name (Better Auth `user.name`), whoever is asking. */
+  ownerName: string;
   isOwner: boolean;
   role: CircleRole;
   /** Only the owner sees (and shares) the code. */
@@ -86,11 +88,22 @@ async function membersOf(db: Db, circleIds: string[]): Promise<Map<string, Circl
   return out;
 }
 
-function toView(circle: CircleRow, viewerId: string, members: CircleMemberView[]): CircleView {
+/** Account names (Better Auth `user.name`) by user id. */
+export async function accountNames(db: Db, userIds: string[]): Promise<Map<string, string>> {
+  if (userIds.length === 0) return new Map();
+  const rows = await db
+    .select({ id: user.id, name: user.name })
+    .from(user)
+    .where(inArray(user.id, [...new Set(userIds)]));
+  return new Map(rows.map((row) => [row.id, row.name]));
+}
+
+function toView(circle: CircleRow, viewerId: string, members: CircleMemberView[], ownerName: string): CircleView {
   const isOwner = circle.ownerUserId === viewerId;
   const role = members.find((m) => m.userId === viewerId)?.role ?? (isOwner ? "member" : "caregiver");
   return {
     id: circle.id,
+    ownerName,
     isOwner,
     role,
     inviteCode: isOwner ? circle.inviteCode : null,
@@ -100,8 +113,8 @@ function toView(circle: CircleRow, viewerId: string, members: CircleMemberView[]
 }
 
 async function viewOf(db: Db, circle: CircleRow, viewerId: string): Promise<CircleView> {
-  const members = await membersOf(db, [circle.id]);
-  return toView(circle, viewerId, members.get(circle.id) ?? []);
+  const [members, names] = await Promise.all([membersOf(db, [circle.id]), accountNames(db, [circle.ownerUserId])]);
+  return toView(circle, viewerId, members.get(circle.id) ?? [], names.get(circle.ownerUserId) ?? "");
 }
 
 export async function findOwnedCircle(db: Db, userId: string): Promise<CircleRow | undefined> {
@@ -183,11 +196,19 @@ export async function listCircles(db: Db, userId: string): Promise<CircleView[]>
     .innerJoin(circles, eq(circles.id, circleMembers.circleId))
     .where(eq(circleMembers.userId, userId))
     .orderBy(asc(circleMembers.joinedAt));
-  const members = await membersOf(
-    db,
-    rows.map((row) => row.circle.id),
+  const [members, names] = await Promise.all([
+    membersOf(
+      db,
+      rows.map((row) => row.circle.id),
+    ),
+    accountNames(
+      db,
+      rows.map((row) => row.circle.ownerUserId),
+    ),
+  ]);
+  return rows.map(({ circle }) =>
+    toView(circle, userId, members.get(circle.id) ?? [], names.get(circle.ownerUserId) ?? ""),
   );
-  return rows.map(({ circle }) => toView(circle, userId, members.get(circle.id) ?? []));
 }
 
 /**

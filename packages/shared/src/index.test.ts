@@ -9,10 +9,10 @@ describe("package entry", () => {
       // schemas
       "ProfileSchema", "MedicationSchema", "ScheduleSchema", "DoseSchema", "SettingsSchema", "DEFAULT_SETTINGS",
       "CircleSchema", "CircleMemberSchema", "DeviceSchema", "SyncPushRequestSchema", "SyncPullResponseSchema",
-      "MED_PALETTE", "MED_ICONS",
+      "MED_PALETTE", "MED_ICONS", "APPEARANCES", "initialFor",
       // domain
-      "doseIdFor", "expandDoses", "nextDueAfter", "logAsNeeded", "asNeededRemaining",
-      "doseState", "markTaken", "markSkipped", "snooze", "undo", "escalationDueAt", "activeWindow",
+      "doseIdFor", "expandDoses", "nextDueAfter", "logAsNeeded", "asNeededRemaining", "asNeededCount",
+      "doseState", "markTaken", "markSkipped", "snooze", "undo", "escalationDueAt", "activeWindow", "timeLeftLabel",
       "dailyRate", "weeklySummary", "streak", "onTimeRate",
       "decrement", "increment", "daysLeft", "refillDate", "needsRefill", "dosesPerDay",
       "SEASONS", "SEASON_IDS", "resolveSeason", "seasonWindows", "nthWeekdayOfMonth", "easterSunday", "effectiveTheme",

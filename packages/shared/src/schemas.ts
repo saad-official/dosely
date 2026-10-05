@@ -128,6 +128,10 @@ export const DoseSchema = z
 
 export const QuietHoursSchema = z.object({ start: HhmmSchema, end: HhmmSchema });
 
+/** Colour-scheme preference: follow the system, or force light / dark. */
+export const APPEARANCES = ["system", "light", "dark"] as const;
+export const AppearanceSchema = z.enum(APPEARANCES);
+
 export const SettingsSchema = z.object({
   onboarded: z.boolean().default(false),
   /** Picked theme. With `autoSeasonal` on, the date's season overrides it (see `effectiveTheme`). */
@@ -137,6 +141,8 @@ export const SettingsSchema = z.object({
   /** Minutes after a dose window closes before it counts as missed and caregivers are told. */
   escalationMinutes: z.number().int().min(0).max(24 * 60).default(30),
   quietHours: QuietHoursSchema.optional(),
+  /** Device colour scheme override (System / Light / Dark in Settings). */
+  appearance: AppearanceSchema.default("system"),
 });
 
 export const DEFAULT_SETTINGS: Settings = SettingsSchema.parse({});
@@ -214,6 +220,7 @@ export type Schedule = z.infer<typeof ScheduleSchema>;
 export type Medication = z.infer<typeof MedicationSchema>;
 export type Dose = z.infer<typeof DoseSchema>;
 export type QuietHours = z.infer<typeof QuietHoursSchema>;
+export type Appearance = z.infer<typeof AppearanceSchema>;
 export type Settings = z.infer<typeof SettingsSchema>;
 export type Circle = z.infer<typeof CircleSchema>;
 export type CircleMember = z.infer<typeof CircleMemberSchema>;

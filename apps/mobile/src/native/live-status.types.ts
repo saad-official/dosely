@@ -71,12 +71,3 @@ export function toDoseWindowView(window: ActiveWindow, now = Date.now()): DoseWi
     palette: widgetPalette(effectiveTheme(settings, todayKey())),
   };
 }
-
-/** "35 min left" / "1 h 5 min left". */
-export function timeLeftLabel(endsAt: string, now = Date.now()): string {
-  const minutes = Math.max(0, Math.ceil((Date.parse(endsAt) - now) / 60_000));
-  if (minutes < 60) return `${minutes} min left`;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return m ? `${h} h ${m} min left` : `${h} h left`;
-}

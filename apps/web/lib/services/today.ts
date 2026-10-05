@@ -5,7 +5,7 @@ import type { Db } from "@/lib/db/client";
 import { circleMembers, doses, medications, profiles } from "@/lib/db/schema";
 import { dayBounds, isTimeZone, localDate } from "@/lib/domain/day";
 import { doseState, type DoseState } from "@/lib/domain/dose-state";
-import { requireMembership } from "./circles";
+import { accountNames, requireMembership } from "./circles";
 
 export const todayQuerySchema = z.object({
   tz: z.string().max(64).refine(isTimeZone, "Unknown time zone.").default("UTC"),
@@ -28,7 +28,17 @@ export type TodayDose = {
 };
 export type TodayProfile = { id: string; name: string; color: string; doses: TodayDose[] };
 export type TodayMember = { userId: string; name: string; profiles: TodayProfile[] };
-export type TodayView = { circleId: string; date: string; timeZone: string; generatedAt: string; members: TodayMember[] };
+export type TodayView = {
+  circleId: string;
+  /** The circle owner's account name (Better Auth `user.name`). */
+  ownerName: string;
+  /** When the circle was created (ISO). */
+  createdAt: string;
+  date: string;
+  timeZone: string;
+  generatedAt: string;
+  members: TodayMember[];
+};
 
 const iso = (value: Date | null) => (value ? value.toISOString() : null);
 
@@ -45,9 +55,18 @@ export async function circleToday(
   options: { timeZone: string; date?: string },
   now = new Date(),
 ): Promise<TodayView> {
-  await requireMembership(db, circleId, viewerId);
+  const { circle } = await requireMembership(db, circleId, viewerId);
   const date = options.date ?? localDate(now, options.timeZone);
   const { start, end } = dayBounds(date, options.timeZone);
+  const ownerName = (await accountNames(db, [circle.ownerUserId])).get(circle.ownerUserId) ?? "";
+  const head = {
+    circleId,
+    ownerName,
+    createdAt: circle.createdAt.toISOString(),
+    date,
+    timeZone: options.timeZone,
+    generatedAt: now.toISOString(),
+  };
 
   const members = await db
     .select({ userId: circleMembers.userId, name: circleMembers.profileName })
@@ -56,7 +75,7 @@ export async function circleToday(
     .orderBy(asc(circleMembers.joinedAt));
   const userIds = members.map((m) => m.userId);
   if (userIds.length === 0) {
-    return { circleId, date, timeZone: options.timeZone, generatedAt: now.toISOString(), members: [] };
+    return { ...head, members: [] };
   }
 
   const rows = await db
@@ -95,5 +114,5 @@ export async function circleToday(
       snoozedUntil: iso(dose.snoozedUntil),
     });
   }
-  return { circleId, date, timeZone: options.timeZone, generatedAt: now.toISOString(), members: view };
+  return { ...head, members: view };
 }

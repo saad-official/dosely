@@ -97,7 +97,3 @@ export function formatMinutes(minutes: number): string {
   return m ? `${h} h ${m} min` : `${h} h`;
 }
 
-/** First letter(s) for an avatar. */
-export function initialOf(name: string): string {
-  return (name.trim()[0] ?? '?').toUpperCase();
-}

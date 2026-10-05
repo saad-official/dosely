@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -6,7 +7,7 @@ import { GET as today } from "@/app/api/circles/[id]/today/route";
 import { POST as joinCircle } from "@/app/api/circles/join/route";
 import { POST as createCircle } from "@/app/api/circles/route";
 import type { DbHandle } from "@/lib/db/client";
-import { doses, medications, profiles } from "@/lib/db/schema";
+import { circles, doses, medications, profiles } from "@/lib/db/schema";
 import { circleToday } from "@/lib/services/today";
 import { jsonRequest, signUpTestUser, startTestDb, stopTestDb, type TestUser } from "./helpers";
 
@@ -88,7 +89,8 @@ describe("GET /api/circles/:id/today", () => {
     const response = await request(daughter, circleId, "?tz=America/Toronto&date=2026-10-05");
     expect(response.status).toBe(200);
     const json = await response.json();
-    expect(json).toMatchObject({ circleId, date: "2026-10-05", timeZone: "America/Toronto" });
+    expect(json).toMatchObject({ circleId, ownerName: "Maria", date: "2026-10-05", timeZone: "America/Toronto" });
+    expect(Number.isNaN(Date.parse(json.createdAt))).toBe(false);
     expect(json.members).toHaveLength(1);
     expect(json.members[0]).toMatchObject({ userId: mum.id, name: "Mum" });
   });
@@ -107,6 +109,13 @@ describe("circleToday", () => {
       ["d-evening", "Metformin", "upcoming"],
     ]);
     expect(member!.profiles[0]!.doses[2]).toMatchObject({ strength: "20 mg", dueAt: "2026-10-05T15:30:00.000Z" });
+  });
+
+  it("names the owner by their account name and says when the circle was created", async () => {
+    const view = await circleToday(handle.db, daughter.id, circleId, { timeZone: "UTC" }, NOW);
+    const [listed] = await handle.db.select().from(circles).where(eq(circles.id, circleId));
+    expect(view.ownerName).toBe("Maria");
+    expect(view.createdAt).toBe(listed!.createdAt.toISOString());
   });
 
   it("defaults the date to today in the zone", async () => {

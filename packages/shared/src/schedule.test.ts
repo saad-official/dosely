@@ -1,6 +1,6 @@
 import { CREATED, MED_ID, MED_ID_2, PROFILE_ID, makeDose, makeMed } from "./fixtures.test-util";
 import { idFromKey, isUuid } from "./ids";
-import { asNeededRemaining, doseIdFor, expandDoses, logAsNeeded, nextDueAfter } from "./schedule";
+import { asNeededCount, asNeededRemaining, doseIdFor, expandDoses, logAsNeeded, nextDueAfter } from "./schedule";
 import { localTime } from "./tz";
 
 const TOR = "America/Toronto";
@@ -222,5 +222,23 @@ describe("asNeededRemaining", () => {
     ];
     expect(asNeededRemaining(med, doses, "2026-10-05", "UTC")).toBe(0);
     expect(asNeededRemaining(med, doses.slice(4), "2026-10-05", "UTC")).toBe(3);
+  });
+});
+
+describe("asNeededCount", () => {
+  const taken = (at: string) => makeDose(at, { source: "as-needed", takenAt: at, windowEndsAt: at });
+  it("counts live as-needed doses taken that local day, capped or not", () => {
+    const med = makeMed({ schedule: { kind: "as-needed" } });
+    const doses = [
+      taken("2026-10-05T10:00:00.000Z"),
+      taken("2026-10-05T03:00:00.000Z"),
+      { ...taken("2026-10-05T11:00:00.000Z"), deletedAt: "2026-10-05T11:01:00.000Z" },
+      { ...taken("2026-10-05T12:00:00.000Z"), medicationId: MED_ID_2 },
+    ];
+    expect(asNeededCount(med, doses, "2026-10-05", "UTC")).toBe(2);
+    expect(asNeededCount(med, doses, "2026-10-05", TOR)).toBe(1);
+  });
+  it("is zero for a scheduled medication", () => {
+    expect(asNeededCount(makeMed(), [makeDose("2026-10-05T10:00:00.000Z", { takenAt: "2026-10-05T10:00:00.000Z" })], "2026-10-05", "UTC")).toBe(0);
   });
 });

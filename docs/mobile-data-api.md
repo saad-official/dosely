@@ -4,9 +4,17 @@ Everything a screen needs from storage, the account API or the OS. Screens and c
 only from `@/data`, `@/hooks/use-*` and `@/native/*`; never from `expo-sqlite`, `drizzle-orm`,
 `expo-notifications`, `expo-widgets`, `expo-live-updates`, `expo-alternate-app-icons`, etc.
 
-Domain types (`Profile`, `Medication`, `Dose`, `Schedule`, `Settings`, `ThemeId`, `DoseState`, …)
-and pure maths (`resolveThemeColors`, `THEMES`, `MED_PALETTE`, `caregiverMessage`, `daysLeft`, …)
-come straight from `@dosely/shared`.
+Domain types (`Profile`, `Medication`, `Dose`, `Schedule`, `Settings`, `Appearance`, `ThemeId`,
+`DoseState`, …) and pure maths (`resolveThemeColors`, `THEMES`, `MED_PALETTE`, `caregiverMessage`,
+`daysLeft`, `asNeededRemaining`, `initialFor`, `timeLeftLabel`, …) come straight from `@dosely/shared`.
+Formatting helpers that several surfaces share live there too, e.g. `timeLeftLabel(endsAt, now?)`
+(`packages/shared/src/window.ts`: "35 min left", "1 h 05 min left", "2 h left", "ends now"), used by
+the Today "due now" card and the Android Live Update; `initialFor(name)` (`profile.ts`) for avatars.
+
+**Hooks vs plain functions.** Everything named `use*` is a React hook (call it only while rendering,
+from `@/hooks/use-*`; `useDatabaseMigrations`, `useToday`, `useClockTick` and `useStore` come from
+`@/data`). Everything else exported from `@/data` and `@/native/*` is a plain function (sync reads
+or `async` actions) that is safe in event handlers, background tasks and headless code.
 
 Conventions: ids are UUIDv7 strings (scheduled dose ids are deterministic: `doseIdFor(medId, dueAt)`);
 timestamps are ISO-8601 UTC strings; local days are `YYYY-MM-DD` `DayKey`s in the device zone;
@@ -60,18 +68,18 @@ local day changes for time-dependent ones). Results are referentially stable bet
 |---|---|---|
 | `useProfiles()` (`@/hooks/use-profiles`) | `Profile[]`, self first | `const profiles = useProfiles();` |
 | `useProfile(id)` / `useSelfProfile()` | `Profile \| null` | `const me = useSelfProfile();` |
-| `useMedications(profileId?, { includeArchived? })` (`@/hooks/use-medications`) | `MedicationView[]` = `Medication & { perDay, daysLeft, refillDate, needsRefill }` | `const meds = useMedications(profile?.id);` |
+| `useMedications(profileId?, { includeArchived? })` (`@/hooks/use-medications`) | `MedicationView[]` = `Medication & { perDay, daysLeft, refillDate, needsRefill, asNeededToday, asNeededRemaining }`; `asNeededToday` = as-needed doses logged today (0 for scheduled), `asNeededRemaining` = shared `asNeededRemaining` under `maxPerDay` (null when uncapped or scheduled); re-reads on dose writes | `const meds = useMedications(profile?.id); const atLimit = med.asNeededRemaining === 0;` |
 | `useMedication(id)` | `MedicationView \| null` (archived/deleted included) | `const med = useMedication(params.id);` |
 | `useTodayDoses(profileId?)` (`@/hooks/use-doses`) | `DoseView[]` = `Dose & { state, medication, profile }` for today, by due time; states tick every 30 s, rolls at midnight | `const doses = useTodayDoses();` |
 | `useDosesForDay(dayKey, profileId?)` | `DoseView[]` for any local day | `const day = useDosesForDay('2026-10-04');` |
 | `useDose(id)` | `DoseView \| null` | `const dose = useDose(params.id);` |
 | `useActiveWindow()` (`@/hooks/use-active-window`) | `ActiveDoseWindow \| null` = shared `ActiveWindow` (`doseIds, earliestDueAt, latestWindowEndsAt, remaining, total`) + `doses: DoseView[]`; 30 s | `const win = useActiveWindow(); if (win) takeDoses(win.doseIds)` |
-| `useSettings()` (`@/hooks/use-settings`) | `Settings` (`onboarded, theme, autoSeasonal, region, escalationMinutes, quietHours?`) | `const { theme, autoSeasonal } = useSettings();` |
+| `useSettings()` (`@/hooks/use-settings`) | `Settings` (`onboarded, theme, autoSeasonal, region, escalationMinutes, quietHours?, appearance`); `appearance` is `'system' \| 'light' \| 'dark'` (default `'system'`), applied by `AppThemeProvider` | `const { theme, appearance } = useSettings();` |
 | `useEffectiveTheme()` (`@/hooks/use-effective-theme`) | `ThemeId` to render (shared `effectiveTheme`, re-evaluated at local midnight) | `const colors = resolveThemeColors(useEffectiveTheme(), scheme);` |
 | `useAdherence(range, profileId?)` (`@/hooks/use-adherence`) | `AdherenceReport \| null`: `taken/skipped/missed/pending/total/rate`, `days: DaySummary[]`, `perMed: (MedSummary & { streak })[]`, `onTimeRate`, `bestDay`, `worstDay` | `const week = useAdherence(lastDays(7));` |
 | `useSession()` (`@/hooks/use-session`) | Better Auth `{ data, isPending, error, refetch }` (`data` null when signed out) | `const { data: session } = useSession();` |
-| `useCircle({ refreshOnMount? })` (`@/hooks/use-circle`) | `{ circles, own, loading, error, updatedAt, refresh }` (cached offline; `own` = circle the user shares with) | `const { own, circles } = useCircle();` |
-| `useCircleToday(circleId)` | `{ data: CircleTodayView \| null, loading, error, refresh }`, refetched every 60 s | `const today = useCircleToday(params.id);` |
+| `useCircle({ refreshOnMount? })` (`@/hooks/use-circle`) | `{ circles, own, loading, error, updatedAt, refresh(): Promise<void> }` (cached offline; `own` = circle the user shares with). Each `CircleView` has `ownerName` (the owner's account name) and `createdAt` | `const { own, circles } = useCircle(); circles[0]?.ownerName` |
+| `useCircleToday(circleId)` | `{ data: CircleTodayView \| null, loading, refreshing, error, refresh(): Promise<void> }`, polled every 60 s. `loading` = no answer yet for this circle; `refreshing` = a `refresh()` is in flight; `refresh()` resolves when the request settles (never rejects; failures land in `error`, `data` keeps the last answer). `data` has `ownerName` and `createdAt` | `<RefreshControl refreshing={today.refreshing} onRefresh={() => void today.refresh()} />` |
 | `useSyncStatus()` (`@/hooks/use-sync-status`) | `{ running, lastSyncAt, error }` | `const sync = useSyncStatus();` |
 | `useNotificationPermission()` (`@/hooks/use-notification-permission`) | `{ status: 'granted'\|'denied'\|'undetermined', canAskAgain } \| null`, re-read on foreground | `const perm = useNotificationPermission();` |
 | `useDatabaseMigrations()` (`@/data`) | `{ success, error? }` | see section 1 |
@@ -98,8 +106,8 @@ headless code; in UI you can fire and forget.
 | `updateMedication(id, patch)` | re-plans future unmarked doses (past and marked doses never change). |
 | `setInventory(id, count \| null)` | refill / stop tracking. |
 | `archiveMedication(id, archived = true)` / `deleteMedication(id)` | future unmarked doses removed; history kept. |
-| `addProfile({ name, color?, initial?, isSelf? })` / `renameProfile(id, patch)` / `deleteProfile(id)` | delete cascades to the dependent's medications. `ensureSelfProfile(name)` creates "self" at onboarding. |
-| `updateSettings(patch)` | validated; theme / autoSeasonal / region changes switch the app icon and recolour widgets + Live Activity. `await updateSettings({ theme: 'halloween' })` |
+| `addProfile({ name, color?, initial?, isSelf? })` / `renameProfile(id, { name?, color?, initial? })` / `deleteProfile(id)` | `initial` defaults to shared `initialFor(name)` (a rename re-derives it), so callers pass only the name. Delete cascades to the dependent's medications. `ensureSelfProfile(name)` creates "self" at onboarding. |
+| `updateSettings(patch)` | validated; theme / autoSeasonal / region changes switch the app icon and recolour widgets + Live Activity; `appearance` re-renders the theme provider (which calls `Appearance.setColorScheme`). `await updateSettings({ theme: 'halloween' })`, `updateSettings({ appearance: 'dark' })` |
 | `syncAppIconWithTheme()` | re-apply today's effective icon (done for you at launch and midnight). |
 | `deleteAllLocalData()` | cancels reminders, wipes every table, clears surfaces (the encryption key is kept). |
 | `seedDemoData()` | **dev only** (throws outside `__DEV__`): self + "Mom", 4 meds (one due in ~5 min), 6 days of history. |
@@ -117,7 +125,7 @@ Reads without hooks (headless or one-off): `listProfiles`, `getProfile`, `getSel
 | `deleteAccountEverywhere(password)` | server deletes account, circle, mirrored rows; then signs out locally. |
 | `createCircle(profileName?)` | `POST /api/circles` → `CircleView` with `inviteCode` (owner only). Sharing starts syncing. |
 | `joinCircle(code, profileName?)` | caregiver join; `ApiError` codes `circle_not_found` (404), `own_circle` / `circle_full` (409). |
-| `refreshCircles()` / `getCircleToday(circleId)` | list (cached) / read-only caregiver today view. |
+| `refreshCircles()` / `getCircleToday(circleId)` | list (cached) / read-only caregiver today view. Both carry `ownerName` (Better Auth `user.name` of the owner, never guessed from `members`) and `createdAt`; circles cached by older builds may lack `ownerName`, so fall back to a generic label. |
 | `deleteCircle(circleId)` / `leaveCircle(circleId, myUserId)` / `removeCircleMember(circleId, userId)` | owner stops sharing / caregiver leaves / owner removes. |
 | `syncNow()` / `scheduleSync()` | push dirty rows then pull (only when signed in **and** owning a circle). Never throws; see `useSyncStatus()`. |
 | `pushDirty()` / `pullSince()` | low level: shared `diffDirty` / `applyPull` against the per-table `sync_state` cursors. |
@@ -143,8 +151,9 @@ API base URL: `EXPO_PUBLIC_API_URL` (e.g. `http://192.168.1.20:3700` for a LAN d
 ## 6. Storage notes (for reviewers)
 
 - Tables: `profiles`, `medications` (`schedule_json` validated by `ScheduleSchema`), `doses`,
-  `settings` (JSON values; `app.*` keys are device-local: circle cache, push token, device id,
-  last sync), `sync_state(table_name, pushed_up_to, pulled_at, updated_at)`,
+  `settings` (JSON values: one row per shared `Settings` key, incl. `appearance`; `app.*` keys are
+  device-local and cleared on sign-out: circle cache, push token, device id, last sync. The old
+  `app.appearance` key is no longer read), `sync_state(table_name, pushed_up_to, pulled_at, updated_at)`,
   `escalations_sent(dose_id, notified_at)`. Schema: `src/data/schema.ts`; migrations in
   `apps/mobile/drizzle/` (`pnpm --filter mobile db:generate` after a schema edit; `.sql` files are
   inlined by babel-plugin-inline-import).
@@ -155,3 +164,15 @@ API base URL: `EXPO_PUBLIC_API_URL` (e.g. `http://192.168.1.20:3700` for a LAN d
 - Alternate icons: `pnpm --filter mobile icons` regenerates the placeholder PNGs in
   `assets/icons/` from the shared theme accents; app.json registers them with
   `expo-alternate-app-icons`.
+
+## 7. Known gaps
+
+- **Quiet hours.** `Settings.quietHours` exists in the schema and Settings shows it, but nothing
+  writes it and reminders ignore it; the screen points people to Focus / Do Not Disturb for now.
+- **Clipboard.** There is no `expo-clipboard` dependency: the invite code is `selectable` text plus
+  the share sheet, with no one-tap "Copy" button.
+- **Binary export.** History export is CSV text only (`shareHistoryCsv`); there is no PDF report or
+  full backup / restore file.
+- **APNs push-to-update.** The iOS Live Activity is started and updated only by the app (foreground,
+  notification actions, background task); the server never sends ActivityKit push updates, so a
+  Live Activity can lag until the app next runs (out of scope for v0.1 per `docs/spec.md`).

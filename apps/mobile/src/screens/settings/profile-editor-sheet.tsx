@@ -1,4 +1,4 @@
-import { MED_COLOR_NAMES, type MedColor } from '@dosely/shared';
+import { initialFor, MED_COLOR_NAMES, type MedColor } from '@dosely/shared';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, View } from 'react-native';
@@ -10,7 +10,6 @@ import { medColorHex } from '@/components/med-icon';
 import { PrimaryButton } from '@/components/primary-button';
 import { SwatchPicker } from '@/components/swatch-picker';
 import { showToast } from '@/components/toast';
-import { initialOf } from '@/constants/format';
 import { icons } from '@/constants/icons';
 import { addProfile, deleteProfile, renameProfile } from '@/data';
 import { useMedications } from '@/hooks/use-medications';
@@ -40,8 +39,8 @@ export function ProfileEditorSheet() {
     }
     setBusy(true);
     try {
-      if (existing) await renameProfile(existing.id, { name: trimmed, color, initial: initialOf(trimmed) });
-      else await addProfile({ name: trimmed, color, initial: initialOf(trimmed) });
+      if (existing) await renameProfile(existing.id, { name: trimmed, color });
+      else await addProfile({ name: trimmed, color });
       haptics.taken();
       router.back();
     } catch {
@@ -82,7 +81,7 @@ export function ProfileEditorSheet() {
       <View style={{ alignItems: 'center' }}>
         <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: medColorHex(color), alignItems: 'center', justifyContent: 'center' }}>
           <AppText variant="title" weight="700" maxFontSizeMultiplier={1.2} style={{ color: onSwatch }}>
-            {initialOf(name || '?')}
+            {initialFor(name)}
           </AppText>
         </View>
       </View>

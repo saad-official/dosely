@@ -1,3 +1,4 @@
+import { initialFor } from '@dosely/shared';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, RefreshControl, Share, View } from 'react-native';
@@ -11,7 +12,6 @@ import { Screen } from '@/components/screen';
 import { SectionHeader } from '@/components/section-header';
 import { SkeletonList } from '@/components/skeleton';
 import { showToast } from '@/components/toast';
-import { initialOf } from '@/constants/format';
 import { icons } from '@/constants/icons';
 import { SITE_URL } from '@/constants/links';
 import { createCircle, deleteCircle, removeCircleMember, type CircleView } from '@/data';
@@ -28,15 +28,15 @@ function Avatar({ name }: { name: string }) {
   return (
     <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' }}>
       <AppText variant="callout" weight="700" tone="accent" maxFontSizeMultiplier={1.3}>
-        {initialOf(name)}
+        {initialFor(name)}
       </AppText>
     </View>
   );
 }
 
-/** Who owns a circle I care for (the owner shares; caregivers watch). */
+/** Who owns a circle I care for (the owner shares; caregivers watch): their account name from the API. */
 function ownerName(circle: CircleView): string {
-  return circle.members.find((m) => m.role === 'member')?.name ?? 'Shared circle';
+  return circle.ownerName || 'Shared circle';
 }
 
 function SignedOut() {

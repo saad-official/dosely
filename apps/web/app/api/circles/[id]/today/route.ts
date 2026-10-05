@@ -5,8 +5,8 @@ import { circleToday, todayQuerySchema } from "@/lib/services/today";
 
 /**
  * Read-only caregiver view: `?tz=<IANA zone>&date=YYYY-MM-DD` (both optional;
- * UTC and today by default). Answer: `{ circleId, date, timeZone,
- * generatedAt, members: [{ userId, name, profiles: [{ id, name, color,
+ * UTC and today by default). Answer: `{ circleId, ownerName, createdAt,
+ * date, timeZone, generatedAt, members: [{ userId, name, profiles: [{ id, name, color,
  * doses: [{ id, medicationName, strength, dueAt, state, ... }] }] }] }`.
  */
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -1,5 +1,5 @@
 // Android: Live Update (expo-live-updates) on Android 16+, an ongoing notification below that.
-import type { ActiveWindow } from '@dosely/shared';
+import { type ActiveWindow, timeLeftLabel } from '@dosely/shared';
 import { addNotificationStateChangeListener, startLiveUpdate, stopLiveUpdate, updateLiveUpdate } from 'expo-live-updates';
 // The package index does not re-export its state/config types.
 import type { LiveUpdateConfig, LiveUpdateState } from 'expo-live-updates/build/types';
@@ -7,7 +7,7 @@ import Storage from 'expo-sqlite/kv-store';
 import { Platform } from 'react-native';
 
 import { notificationStatusListener } from './live-status.shared';
-import { type DoseWindowView, type StatusActionListener, timeLeftLabel, toDoseWindowView } from './live-status.types';
+import { type DoseWindowView, type StatusActionListener, toDoseWindowView } from './live-status.types';
 import {
   dismissDoseWindowNotification,
   getNotificationPermission,

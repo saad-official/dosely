@@ -34,7 +34,7 @@ import {
   saveMedication,
   setMedicationArchived,
 } from './medications-repo';
-import { createProfile, markProfileDeleted, type ProfileInput, updateProfile } from './profiles-repo';
+import { createProfile, markProfileDeleted, type ProfileInput, type ProfilePatch, updateProfile } from './profiles-repo';
 import { wipeAllTables } from './reset';
 import { getSettings, updateSettings as writeSettings } from './settings-repo';
 import { scheduleSync } from './sync-client';
@@ -184,13 +184,15 @@ export async function deleteMedication(id: string): Promise<void> {
   await afterWrite({ medId: id });
 }
 
+/** Adds a dependent; `initial` defaults to `initialFor(name)`. */
 export async function addProfile(input: ProfileInput) {
   const profile = createProfile(input);
   scheduleSync();
   return profile;
 }
 
-export async function renameProfile(id: string, patch: Parameters<typeof updateProfile>[1]) {
+/** Renames / recolours a profile; a new name re-derives the initial unless one is given. */
+export async function renameProfile(id: string, patch: ProfilePatch) {
   const profile = updateProfile(id, patch);
   await afterWrite();
   return profile;

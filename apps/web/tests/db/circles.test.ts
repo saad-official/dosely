@@ -198,6 +198,20 @@ describe("GET /api/circles", () => {
     expect(byId.get(hers.circle.id)).toMatchObject({ isOwner: false, role: "caregiver", inviteCode: null });
   });
 
+  it("names each circle's owner by their account name, with when it was created", async () => {
+    const son = await signUpTestUser("Tomas");
+    const mum = await signUpTestUser("Maria Lopez");
+    const { json: hers } = await create(mum, { profileName: "Mum" });
+    await join(son, { code: hers.circle.inviteCode, profileName: "Son" });
+
+    const { json } = await list(son);
+    expect(json.circles).toEqual([
+      expect.objectContaining({ id: hers.circle.id, ownerName: "Maria Lopez", createdAt: hers.circle.createdAt }),
+    ]);
+    expect(Number.isNaN(Date.parse(json.circles[0].createdAt))).toBe(false);
+    expect((await list(mum)).json.circles[0]).toMatchObject({ isOwner: true, ownerName: "Maria Lopez" });
+  });
+
   it("returns an empty list for someone with no circle", async () => {
     const loner = await signUpTestUser();
     expect((await list(loner)).json).toEqual({ circles: [] });

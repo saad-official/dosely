@@ -1,5 +1,5 @@
 import { MED_ID_2, makeDose, plusMin } from "./fixtures.test-util";
-import { activeWindow, doseState, escalationDueAt, markSkipped, markTaken, snooze, undo } from "./window";
+import { activeWindow, doseState, escalationDueAt, markSkipped, markTaken, snooze, timeLeftLabel, undo } from "./window";
 
 const DUE = "2026-10-05T08:00:00.000Z";
 const at = (minutes: number) => plusMin(DUE, minutes);
@@ -137,5 +137,20 @@ describe("activeWindow", () => {
     expect(activeWindow([a, b, c], at(-5))).toBeNull();
     expect(activeWindow([{ ...a, deletedAt: at(0) }], at(10))).toBeNull();
     expect(activeWindow([makeDose(DUE, { source: "as-needed", windowEndsAt: at(60) })], at(10))).toBeNull();
+  });
+});
+
+describe("timeLeftLabel", () => {
+  it("counts whole minutes up under an hour", () => {
+    expect(timeLeftLabel(at(35), DUE)).toBe("35 min left");
+    expect(timeLeftLabel(at(35), Date.parse(at(0)) + 30_000)).toBe("35 min left");
+  });
+  it("shows hours with zero-padded minutes", () => {
+    expect(timeLeftLabel(at(65), DUE)).toBe("1 h 05 min left");
+    expect(timeLeftLabel(at(120), DUE)).toBe("2 h left");
+  });
+  it("says the window ends now at or after its end", () => {
+    expect(timeLeftLabel(DUE, DUE)).toBe("ends now");
+    expect(timeLeftLabel(DUE, at(5))).toBe("ends now");
   });
 });

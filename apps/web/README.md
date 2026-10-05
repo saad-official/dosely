@@ -22,11 +22,11 @@ All bodies are JSON (`content-type: application/json`, validated with zod: 400 o
 | `GET /api/health` | Liveness, no database. |
 | `/api/auth/*` | Better Auth (sign-up/in/out, session, delete-user). |
 | `POST /api/circles` | `{ profileName? }`. Creates the caller's circle (they become its `member`), 201 `{ circle }` with the 8-character invite code; 200 with the existing circle on repeat. |
-| `GET /api/circles` | `{ circles }`: circles the caller owns or cares for, with members. Only the owner sees the invite code. |
+| `GET /api/circles` | `{ circles }`: circles the caller owns or cares for, each with `ownerName` (the owner's account name), `createdAt` and members. Only the owner sees the invite code. |
 | `POST /api/circles/join` | `{ code, profileName? }`, code case- and dash-insensitive. Joins as `caregiver`. 404 `circle_not_found`, 409 `own_circle` / `circle_full` (10 caregivers). Idempotent. |
 | `DELETE /api/circles/:id` | Owner stops sharing: deletes the circle, memberships and every mirrored profile, medication, dose and escalation. 403 for caregivers. |
 | `DELETE /api/circles/:id/members/:userId` | Owner removes a caregiver, or a caregiver leaves. 403 otherwise; 409 `owner_cannot_leave`. |
-| `GET /api/circles/:id/today?tz=&date=` | Read-only caregiver view: each member's live doses due in that local day, grouped by profile, with state `upcoming / due / late / missed / taken / skipped`. 404 for anyone outside the circle. |
+| `GET /api/circles/:id/today?tz=&date=` | Read-only caregiver view (`circleId`, `ownerName`, `createdAt`, `date`, `timeZone`, `generatedAt`, `members`): each member's live doses due in that local day, grouped by profile, with state `upcoming / due / late / missed / taken / skipped`. 404 for anyone outside the circle. |
 | `POST /api/sync/push` | `{ deviceId?, tables: { profiles, medications, doses } }`, last write wins by `max(updatedAt, deletedAt)`, soft deletes, rows a day in the future refused. 403 `no_circle` unless the caller owns a circle (health data leaves the phone only for a circle). |
 | `GET /api/sync/pull?since=` | The caller's own rows changed after the cursor, tombstones included; `serverTime` is the next cursor. |
 | `POST /api/escalations` | `{ doseIds, profileName, medNames, dueAt }` from the member's device. One push per caregiver device (time-sensitive, Android channel `caregiver-alerts`, deep link `dosely://circle/:id`), idempotent per dose; 502 `push_failed` rolls the escalation back so a retry can alert. |

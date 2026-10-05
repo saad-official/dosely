@@ -11,7 +11,7 @@ export { getDose, listDosesBetween } from './doses-repo';
 export { DEFAULT_EXPANSION_DAYS, ensureDosesExpanded } from './expand';
 export { getMedication, listMedications, type MedicationInput, type MedicationPatch } from './medications-repo';
 export { ensureDatabaseReady, useDatabaseMigrations, type DatabaseReadyState } from './migrate';
-export { ensureSelfProfile, getProfile, getSelfProfile, listProfiles, type ProfileInput } from './profiles-repo';
+export { ensureSelfProfile, getProfile, getSelfProfile, listProfiles, type ProfileInput, type ProfilePatch } from './profiles-repo';
 export { seedDemoData } from './seed';
 export { getSettings } from './settings-repo';
 export { createStore, onTablesChanged, useStore, type Store, type TableName } from './store';

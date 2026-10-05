@@ -165,7 +165,13 @@ describe("SettingsSchema", () => {
       autoSeasonal: false,
       region: "both",
       escalationMinutes: 30,
+      appearance: "system",
     });
+  });
+  it("stores the colour-scheme preference: system, light or dark", () => {
+    expect(SettingsSchema.parse({ appearance: "dark" }).appearance).toBe("dark");
+    expect(SettingsSchema.parse({ appearance: "light" }).appearance).toBe("light");
+    expect(SettingsSchema.safeParse({ appearance: "sepia" }).success).toBe(false);
   });
   it("accepts a season theme and quiet hours", () => {
     const s = SettingsSchema.parse({ theme: "halloween", quietHours: { start: "22:00", end: "07:00" } });

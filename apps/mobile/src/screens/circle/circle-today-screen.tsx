@@ -1,5 +1,4 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
 import { Alert, RefreshControl, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -77,7 +76,6 @@ export function CircleTodayScreen() {
   const { data: session, isPending } = useSession();
   const { circles } = useCircle({ refreshOnMount: false });
   const today = useCircleToday(session ? id : null);
-  const [refreshing, setRefreshing] = useState(false);
   const circle = circles.find((c) => c.id === id) ?? null;
 
   if (!session) {
@@ -114,24 +112,22 @@ export function CircleTodayScreen() {
     ]);
 
   const data = today.data;
-  const onRefresh = () => {
-    setRefreshing(true);
-    today.refresh();
-    setTimeout(() => setRefreshing(false), 600);
-  };
+  const onRefresh = () => void today.refresh();
+  // The owner's account name from the API (cached circle list first, then the today payload).
+  const ownerName = circle?.ownerName || data?.ownerName;
 
   return (
-    <Screen refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />}>
-      <Stack.Screen options={{ title: circle?.isOwner ? 'What your circle sees' : 'Caregiver view' }} />
+    <Screen refreshControl={<RefreshControl refreshing={today.refreshing} onRefresh={onRefresh} tintColor={colors.accent} />}>
+      <Stack.Screen options={{ title: circle?.isOwner ? 'What your circle sees' : ownerName ? `${ownerName}'s day` : 'Caregiver view' }} />
 
-      {!data && today.loading ? <SkeletonList rows={4} /> : null}
+      {!data && today.loading && !today.error ? <SkeletonList rows={4} /> : null}
 
       {!data && today.error ? (
         <EmptyState
           icon={icons.warning}
           title="Couldn't load today"
           body={today.error}
-          action={<PrimaryButton title="Try again" block={false} onPress={today.refresh} />}
+          action={<PrimaryButton title="Try again" block={false} loading={today.refreshing} onPress={onRefresh} />}
         />
       ) : null}
 

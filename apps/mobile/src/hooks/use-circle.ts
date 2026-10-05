@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   circleStore,
@@ -26,46 +26,65 @@ export function useCircle(opts: { refreshOnMount?: boolean } = {}): CircleState 
 
 export type CircleTodayState = {
   data: CircleTodayView | null;
+  /** No answer yet for this circle (first load). The 60 s poll never sets it. */
   loading: boolean;
+  /** A `refresh()` call is in flight (drive `RefreshControl` with this). */
+  refreshing: boolean;
+  /** Last request failed (`data` keeps the previous answer, if any). */
   error: string | null;
-  refresh: () => void;
+  /** Refetches now; resolves when that request settles (never rejects: failures land in `error`). */
+  refresh: () => Promise<void>;
 };
+
+type TodayResult = { circleId: string; data: CircleTodayView | null; error: string | null };
+
+const errorText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
 /** Read-only caregiver "today" view of a circle (`GET /api/circles/:id/today`), refetched every 60 s. */
 export function useCircleToday(circleId: string | null | undefined): CircleTodayState {
-  const [data, setData] = useState<CircleTodayView | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [nonce, setNonce] = useState(0);
+  const [result, setResult] = useState<TodayResult | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  // Bumped when the circle changes or the screen unmounts so late answers are dropped.
+  const generation = useRef(0);
+
+  const load = useCallback(async (id: string) => {
+    const mine = generation.current;
+    try {
+      const view = await getCircleToday(id);
+      if (mine === generation.current) setResult({ circleId: id, data: view, error: null });
+    } catch (e) {
+      if (mine !== generation.current) return;
+      setResult((prev) => ({ circleId: id, data: prev?.circleId === id ? prev.data : null, error: errorText(e) }));
+    }
+  }, []);
+
   useEffect(() => {
     if (!circleId) return;
-    let cancelled = false;
-    const load = () => {
-      setLoading(true);
-      getCircleToday(circleId)
-        .then((view) => {
-          if (cancelled) return;
-          setData(view);
-          setError(null);
-        })
-        .catch((e: unknown) => {
-          if (!cancelled) setError(e instanceof Error ? e.message : String(e));
-        })
-        .finally(() => {
-          if (!cancelled) setLoading(false);
-        });
-    };
-    load();
-    const timer = setInterval(load, 60_000);
+    const gen = generation;
+    void load(circleId);
+    const timer = setInterval(() => void load(circleId), 60_000);
     return () => {
-      cancelled = true;
+      gen.current += 1;
       clearInterval(timer);
     };
-  }, [circleId, nonce]);
+  }, [circleId, load]);
+
+  const refresh = useCallback(async () => {
+    if (!circleId) return;
+    setRefreshing(true);
+    try {
+      await load(circleId);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [circleId, load]);
+
+  const current = circleId && result?.circleId === circleId ? result : null;
   return {
-    data: circleId && data?.circleId === circleId ? data : null,
-    loading,
-    error,
-    refresh: () => setNonce((n) => n + 1),
+    data: current?.data ?? null,
+    loading: !!circleId && !current,
+    refreshing,
+    error: current?.error ?? null,
+    refresh,
   };
 }

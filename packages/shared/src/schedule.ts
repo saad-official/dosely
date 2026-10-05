@@ -110,11 +110,16 @@ export function logAsNeeded(med: Medication, now: IsoString): Dose {
   };
 }
 
+/** Live as-needed doses of `med` taken on a local day (0 for a scheduled medication). */
+export function asNeededCount(med: Medication, doses: readonly Dose[], dayKey: DayKey, tz = "UTC"): number {
+  if (med.schedule.kind !== "as-needed") return 0;
+  return doses.filter(
+    (d) => d.medicationId === med.id && d.source === "as-needed" && !d.deletedAt && d.takenAt && dayKeyOf(d.takenAt, tz) === dayKey,
+  ).length;
+}
+
 /** As-needed doses still allowed on a local day under `maxPerDay`, or null when uncapped. */
 export function asNeededRemaining(med: Medication, doses: readonly Dose[], dayKey: DayKey, tz = "UTC"): number | null {
   if (med.schedule.kind !== "as-needed" || med.schedule.maxPerDay === undefined) return null;
-  const used = doses.filter(
-    (d) => d.medicationId === med.id && d.source === "as-needed" && !d.deletedAt && d.takenAt && dayKeyOf(d.takenAt, tz) === dayKey,
-  ).length;
-  return Math.max(0, med.schedule.maxPerDay - used);
+  return Math.max(0, med.schedule.maxPerDay - asNeededCount(med, doses, dayKey, tz));
 }

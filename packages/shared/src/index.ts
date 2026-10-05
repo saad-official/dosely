@@ -5,6 +5,7 @@ export * from "./csv";
 export * from "./escalation";
 export * from "./ids";
 export * from "./inventory";
+export * from "./profile";
 export * from "./schedule";
 export * from "./schemas";
 export * from "./seasons";

@@ -89,10 +89,10 @@ function Hero({ taken, total, remaining, today }: { taken: number; total: number
   );
 }
 
-function AsNeededRow({ med, todayCount }: { med: MedicationView; todayCount: number }) {
+function AsNeededRow({ med }: { med: MedicationView }) {
   const max = med.schedule.kind === 'as-needed' ? med.schedule.maxPerDay : undefined;
-  const atLimit = max !== undefined && todayCount >= max;
-  const countLabel = max ? `${todayCount} of ${max} today` : `${plural(todayCount, 'dose')} today`;
+  const atLimit = med.asNeededRemaining === 0;
+  const countLabel = max ? `${med.asNeededToday} of ${max} today` : `${plural(med.asNeededToday, 'dose')} today`;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md }}>
       <MedIcon icon={med.icon} color={med.color} size={44} />
@@ -203,11 +203,7 @@ export function TodayScreen() {
           <SectionHeader title="As needed" />
           <ListGroup footer="Logged doses count towards your supply, not your adherence.">
             {asNeeded.map((m) => (
-              <AsNeededRow
-                key={m.id}
-                med={m}
-                todayCount={doses.filter((d) => d.source === 'as-needed' && d.medicationId === m.id).length}
-              />
+              <AsNeededRow key={m.id} med={m} />
             ))}
           </ListGroup>
         </View>

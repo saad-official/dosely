@@ -3,6 +3,8 @@
 import {
   activeWindow,
   type ActiveWindow,
+  asNeededCount,
+  asNeededRemaining,
   daysLeft,
   type DayKey,
   type Dose,
@@ -35,6 +37,10 @@ export type MedicationView = Medication & {
   /** Local day the supply runs out, or null. */
   refillDate: DayKey | null;
   needsRefill: boolean;
+  /** As-needed doses logged today (0 for scheduled medications). */
+  asNeededToday: number;
+  /** As-needed doses still allowed today under `maxPerDay` (shared `asNeededRemaining`); null when uncapped or scheduled. */
+  asNeededRemaining: number | null;
 };
 
 export type ActiveDoseWindow = ActiveWindow & { doses: DoseView[] };
@@ -63,21 +69,50 @@ export function doseView(id: string): DoseView | null {
   return d ? viewer()(d) : null;
 }
 
-function toMedicationView(m: Medication, today: DayKey): MedicationView {
+type DayContext = { today: DayKey; tz: string; doses: () => Dose[] };
+
+/** Today's doses, read at most once per batch and only when an as-needed medication asks. */
+function dayContext(): DayContext {
+  const tz = deviceTimeZone();
+  const today = todayKey(tz);
+  let cached: Dose[] | null = null;
+  return {
+    today,
+    tz,
+    doses: () => {
+      if (!cached) {
+        const { start, end } = dayBounds(today, tz);
+        cached = listDosesBetween(start, end);
+      }
+      return cached;
+    },
+  };
+}
+
+function toMedicationView(m: Medication, ctx: DayContext): MedicationView {
   const perDay = dosesPerDay(m.schedule);
-  return { ...m, perDay, daysLeft: daysLeft(m, perDay), refillDate: refillDate(m, perDay, today), needsRefill: needsRefill(m) };
+  const asNeeded = m.schedule.kind === 'as-needed';
+  return {
+    ...m,
+    perDay,
+    daysLeft: daysLeft(m, perDay),
+    refillDate: refillDate(m, perDay, ctx.today),
+    needsRefill: needsRefill(m),
+    asNeededToday: asNeeded ? asNeededCount(m, ctx.doses(), ctx.today, ctx.tz) : 0,
+    asNeededRemaining: asNeeded ? asNeededRemaining(m, ctx.doses(), ctx.today, ctx.tz) : null,
+  };
 }
 
-/** Live medications (optionally one profile's, archived only when asked) with refill maths. */
+/** Live medications (optionally one profile's, archived only when asked) with refill and as-needed maths. */
 export function medicationViews(profileId?: string, opts: { includeArchived?: boolean } = {}): MedicationView[] {
-  const today = todayKey();
-  return listMedications(profileId, opts).map((m) => toMedicationView(m, today));
+  const ctx = dayContext();
+  return listMedications(profileId, opts).map((m) => toMedicationView(m, ctx));
 }
 
-/** One medication with refill maths (archived / deleted rows included), or null. */
+/** One medication with refill and as-needed maths (archived / deleted rows included), or null. */
 export function medicationView(id: string): MedicationView | null {
   const m = getMedication(id);
-  return m ? toMedicationView(m, todayKey()) : null;
+  return m ? toMedicationView(m, dayContext()) : null;
 }
 
 /** The shared `activeWindow` around now, with dose details for the UI. */
