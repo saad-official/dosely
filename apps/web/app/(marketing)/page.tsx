@@ -11,6 +11,7 @@ import {
   TodayScreen,
   WidgetMock,
 } from "@/components/marketing/device-mocks";
+import { ProductVideo } from "@/components/marketing/product-video";
 import { DOSE_TIMELINE, FAQ } from "@/lib/marketing/content";
 
 function Section({ id, title, intro, children }: { id: string; title: string; intro?: ReactNode; children: ReactNode }) {
@@ -84,6 +85,14 @@ function Hero() {
           </div>
         </figure>
       </div>
+    </section>
+  );
+}
+
+function Preview() {
+  return (
+    <section aria-label="Product preview" className="mx-auto max-w-6xl px-5 pt-16 sm:px-8">
+      <ProductVideo />
     </section>
   );
 }
@@ -338,6 +347,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <Preview />
       <HowItWorks />
       <NativeFeatures />
       <CaregiverCircle />
