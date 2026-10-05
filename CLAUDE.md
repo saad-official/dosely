@@ -8,7 +8,7 @@ Free medication reminders with a caregiver circle, seasonal themes and matching 
 - `packages/shared` — pure TypeScript domain + zod schemas + design tokens. No React Native, no Node built-ins. Vitest.
 
 ## Commands (Windows host)
-Node 24 lives at `C:	ools
+Node 24 lives at `C:\tools\node24` (Git Bash: `export PATH="/c/tools/node24:$PATH"`); Gradle cache at `C:\gradle-home` (`export GRADLE_USER_HOME=/c/gradle-home`; G: is nearly full). pnpm 12: linker and allowBuilds settings live in `pnpm-workspace.yaml` (pnpm 12 ignores pnpm keys in `.npmrc`).
 ode24` (Git Bash: `export PATH="/c/tools/node24:$PATH"`); Gradle cache at `C:gradle-home` (`export GRADLE_USER_HOME=/c/gradle-home`; G: is nearly full). pnpm 12: linker and allowBuilds settings live in `pnpm-workspace.yaml` (pnpm 12 ignores pnpm keys in `.npmrc`).
 - Install: `pnpm install` (root). Mobile native libs: `cd apps/mobile && npx expo install <pkg>` — never `pnpm add` for Expo packages.
 - Checks: `pnpm lint`, `pnpm typecheck`, `pnpm test` (root runs every workspace); `cd apps/mobile && npx expo-doctor && npx expo prebuild --clean --platform android`.
