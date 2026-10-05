@@ -1,0 +1,16 @@
+{
+  "name": "dosely",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Dosely: free medication reminders with a caregiver circle. Expo app (iOS + Android) with actionable notifications, dose-window Live Activities, widgets and seasonal themes, plus a Next.js landing site and API.",
+  "packageManager": "pnpm@12.8.1",
+  "engines": { "node": ">=22.13.0 || >=24.3.0" },
+  "scripts": {
+    "mobile": "pnpm --filter mobile start",
+    "web": "pnpm --filter web dev",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "build:web": "pnpm --filter web build"
+  }
+}

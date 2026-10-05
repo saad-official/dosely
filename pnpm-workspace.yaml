@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Expo + Metro need a flat node_modules: https://docs.expo.dev/guides/monorepos/
+nodeLinker: hoisted
+shamefullyHoist: true
