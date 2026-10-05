@@ -4,30 +4,39 @@
     "slug": "dosely",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/icon-default.png",
     "scheme": "dosely",
     "userInterfaceStyle": "automatic",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
       "bundleIdentifier": "com.saadofficial.dosely",
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/icons/icon-default.png",
       "supportsTablet": false,
       "infoPlist": {
         "NSSupportsLiveActivities": true,
-        "NSSupportsLiveActivitiesFrequentUpdates": true,
         "UIBackgroundModes": [
           "fetch",
           "remote-notification",
           "processing"
         ]
+      },
+      "entitlements": {
+        "com.apple.developer.usernotifications.time-sensitive": true
       }
     },
     "android": {
       "package": "com.saadofficial.dosely",
       "adaptiveIcon": {
-        "backgroundColor": "#101417",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#1FA39A",
+        "foregroundImage": "./assets/icons/icon-default-foreground.png",
+        "backgroundImage": "./assets/icons/icon-default-background.png",
+        "monochromeImage": "./assets/icons/icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -54,6 +63,179 @@
             "backgroundColor": "#101417"
           }
         }
+      ],
+      "expo-dev-client",
+      "expo-updates",
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/icon-monochrome.png",
+          "color": "#1FA39A",
+          "defaultChannel": "caregiver-alerts"
+        }
+      ],
+      "expo-task-manager",
+      "expo-background-task",
+      "expo-sharing",
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.saadofficial.dosely.widgets",
+          "groupIdentifier": "group.com.saadofficial.dosely",
+          "frequentUpdates": false,
+          "widgets": [
+            {
+              "name": "NextDoseWidget",
+              "displayName": "Next dose",
+              "description": "Your next medication and today's progress.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryInline"
+                ]
+              },
+              "android": null
+            }
+          ]
+        }
+      ],
+      [
+        "expo-live-updates",
+        {
+          "channelId": "doses-live",
+          "channelName": "Dose window"
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "NextDoseWidget",
+              "label": "Dosely next dose",
+              "description": "Your next medication and today's progress.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "250dp",
+              "maxResizeHeight": "250dp",
+              "resizeMode": "horizontal|vertical",
+              "previewImage": "./assets/widget-preview/next-dose-2x2.png",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ],
+      [
+        "expo-alternate-app-icons",
+        [
+          {
+            "name": "IconNewYear",
+            "ios": "./assets/icons/icon-new-year.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-new-year-foreground.png",
+              "backgroundImage": "./assets/icons/icon-new-year-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconValentines",
+            "ios": "./assets/icons/icon-valentines.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-valentines-foreground.png",
+              "backgroundImage": "./assets/icons/icon-valentines-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconStPatricks",
+            "ios": "./assets/icons/icon-st-patricks.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-st-patricks-foreground.png",
+              "backgroundImage": "./assets/icons/icon-st-patricks-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconEaster",
+            "ios": "./assets/icons/icon-easter.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-easter-foreground.png",
+              "backgroundImage": "./assets/icons/icon-easter-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconCanadaDay",
+            "ios": "./assets/icons/icon-canada-day.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-canada-day-foreground.png",
+              "backgroundImage": "./assets/icons/icon-canada-day-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconIndependenceDay",
+            "ios": "./assets/icons/icon-independence-day.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-independence-day-foreground.png",
+              "backgroundImage": "./assets/icons/icon-independence-day-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconHalloween",
+            "ios": "./assets/icons/icon-halloween.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-halloween-foreground.png",
+              "backgroundImage": "./assets/icons/icon-halloween-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconThanksgivingCa",
+            "ios": "./assets/icons/icon-thanksgiving-ca.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-thanksgiving-ca-foreground.png",
+              "backgroundImage": "./assets/icons/icon-thanksgiving-ca-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconThanksgivingUs",
+            "ios": "./assets/icons/icon-thanksgiving-us.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-thanksgiving-us-foreground.png",
+              "backgroundImage": "./assets/icons/icon-thanksgiving-us-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          },
+          {
+            "name": "IconHolidays",
+            "ios": "./assets/icons/icon-holidays.png",
+            "android": {
+              "foregroundImage": "./assets/icons/icon-holidays-foreground.png",
+              "backgroundImage": "./assets/icons/icon-holidays-background.png",
+              "monochromeImage": "./assets/icons/icon-monochrome.png"
+            }
+          }
+        ]
       ]
     ],
     "experiments": {

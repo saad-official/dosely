@@ -20,4 +20,4 @@ Node 24 lives at `C:\tools\node24` (Git Bash: `export PATH="/c/tools/node24:$PAT
 - Domain logic (schedule expansion, DST, dose windows, adherence, inventory, seasons) lives in `packages/shared` with tests written first.
 - Commit small and often with conventional prefixes. Never commit secrets; `.env.local`, `google-services.json` and keys are ignored.
 - Dosely is free: no purchases, no subscription code, no ads. Health data stays on the device unless the user joins a caregiver circle.
-- Seasonal themes: token overrides in `packages/shared/src/seasons.ts` + `themes.ts`; icon switching only through `src/native/app-icon.ts` (expo-dynamic-app-icon). Manual selection always beats the auto-by-date resolver.
+- Seasonal themes: token overrides in `packages/shared/src/seasons.ts` + `themes.ts`; icon switching only through `src/native/app-icon.ts` (expo-alternate-app-icons). Manual selection always beats the auto-by-date resolver.
