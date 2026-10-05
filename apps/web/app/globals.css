@@ -1,26 +1,154 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/*
+ * Design tokens come from packages/shared/src/tokens.ts: the root layout
+ * renders them as --do-* custom properties (lib/tokens-css.ts), switched by
+ * the .dark class (next-themes), the system preference, or data-scheme on
+ * one element. Utilities below map Tailwind names onto those variables, so
+ * there are no colour or size literals in the components.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--do-color-surface);
+  --color-elevated: var(--do-color-surface-elevated);
+  --color-sunken: var(--do-color-surface-sunken);
+  --color-ink: var(--do-color-text);
+  --color-ink-2: var(--do-color-text-secondary);
+  --color-ink-3: var(--do-color-text-tertiary);
+  --color-accent: var(--do-color-accent);
+  --color-accent-pressed: var(--do-color-accent-pressed);
+  --color-accent-soft: var(--do-color-accent-soft);
+  --color-accent-ink: var(--do-color-accent-text);
+  --color-on-accent: var(--do-color-on-accent);
+  --color-success: var(--do-color-success);
+  --color-success-soft: var(--do-color-success-soft);
+  --color-warning: var(--do-color-warning);
+  --color-warning-soft: var(--do-color-warning-soft);
+  --color-danger: var(--do-color-danger);
+  --color-danger-soft: var(--do-color-danger-soft);
+  --color-on-danger: var(--do-color-on-danger);
+  --color-line: var(--do-color-separator);
+  --color-edge: var(--do-color-border);
+
+  --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: var(--do-radius-sm);
+  --radius-md: var(--do-radius-md);
+  --radius-lg: var(--do-radius-lg);
+
+  --text-display: var(--do-font-size-display);
+  --text-display--line-height: var(--do-line-height-display);
+  --text-display--letter-spacing: var(--do-letter-spacing-display);
+  --text-title: var(--do-font-size-title);
+  --text-title--line-height: var(--do-line-height-title);
+  --text-title--letter-spacing: var(--do-letter-spacing-title);
+  --text-headline: var(--do-font-size-headline);
+  --text-headline--line-height: var(--do-line-height-headline);
+  --text-body: var(--do-font-size-body);
+  --text-body--line-height: var(--do-line-height-body);
+  --text-callout: var(--do-font-size-callout);
+  --text-callout--line-height: var(--do-line-height-callout);
+  --text-caption: var(--do-font-size-caption);
+  --text-caption--line-height: var(--do-line-height-caption);
+
+  --shadow-sm: var(--do-shadow-sm);
+  --shadow-md: var(--do-shadow-md);
+  --shadow-lg: var(--do-shadow-lg);
+
+  --ease-standard: var(--do-ease-standard);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    background: var(--do-color-surface);
+    color: var(--do-color-text);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--do-font-size-body);
+    line-height: var(--do-line-height-body);
+    background: var(--do-color-surface);
+    color: var(--do-color-text);
+    font-feature-settings: "tnum" 0;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--do-color-accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--do-color-accent-soft);
+    color: var(--do-color-text);
+  }
+
+  a {
+    text-underline-offset: 0.2em;
+  }
+
+  /* Times and counts never jump width. */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Long-form pages (privacy, terms, support). */
+@layer components {
+  .prose-doc {
+    max-width: 68ch;
+  }
+  .prose-doc h2 {
+    font-size: var(--do-font-size-headline);
+    line-height: var(--do-line-height-headline);
+    font-weight: 600;
+    margin-top: 2.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .prose-doc h3 {
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .prose-doc p,
+  .prose-doc ul {
+    margin-bottom: 1rem;
+    color: var(--do-color-text-secondary);
+  }
+  .prose-doc strong {
+    color: var(--do-color-text);
+    font-weight: 600;
+  }
+  .prose-doc ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+  }
+  .prose-doc li + li {
+    margin-top: 0.375rem;
+  }
+  .prose-doc a {
+    color: var(--do-color-accent-text);
+    text-decoration: underline;
+  }
+
+  /* A dose window draining: used by the Live Activity mock. */
+  .window-bar {
+    background: linear-gradient(
+      to right,
+      var(--do-color-accent) var(--remaining, 60%),
+      color-mix(in oklab, var(--do-color-text) 18%, transparent) var(--remaining, 60%)
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
