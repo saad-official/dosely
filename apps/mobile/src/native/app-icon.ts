@@ -3,6 +3,7 @@
 // (`icon-new-year` → `IconNewYear`); the default theme restores the primary icon (null).
 import { APP_ICONS, type ThemeId } from '@dosely/shared';
 import { getAppIconName, setAlternateAppIcon, supportsAlternateIcons as nativeSupports } from 'expo-alternate-app-icons';
+import { AppState, Platform } from 'react-native';
 
 /** `icon-new-year` → `IconNewYear` (the plugin's naming). */
 export function alternateIconName(themeId: ThemeId): string | null {
@@ -45,4 +46,47 @@ export async function applyAppIcon(themeId: ThemeId): Promise<{ changed: boolean
     console.warn('[app-icon] setAlternateAppIcon failed', error);
     return { changed: false };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Deferred switching (Android)
+//
+// On Android an alternate icon is an <activity-alias>: enabling it disables the current launcher
+// component, which closes the app's task on the spot. Switching while the user is looking at the
+// screen therefore feels like a crash. So on Android the swap waits until the app is in the
+// background; iOS switches immediately (the system shows its own confirmation alert).
+
+let pendingTheme: ThemeId | null = null;
+let appStateSub: { remove(): void } | null = null;
+
+async function flushPendingIcon(): Promise<void> {
+  const theme = pendingTheme;
+  pendingTheme = null;
+  appStateSub?.remove();
+  appStateSub = null;
+  if (theme) await applyAppIcon(theme);
+}
+
+/** Switches the icon now on iOS; on Android, the next time the app goes to the background. */
+export async function applyAppIconWhenIdle(themeId: ThemeId): Promise<{ changed: boolean; deferred: boolean }> {
+  if (Platform.OS !== 'android') {
+    const r = await applyAppIcon(themeId);
+    return { ...r, deferred: false };
+  }
+  if (!supportsAlternateIcons()) return { changed: false, deferred: false };
+  if (currentAppIcon() === alternateIconName(themeId)) {
+    pendingTheme = null;
+    return { changed: false, deferred: false };
+  }
+  pendingTheme = themeId;
+  if (AppState.currentState !== 'active') {
+    await flushPendingIcon();
+    return { changed: true, deferred: false };
+  }
+  if (!appStateSub) {
+    appStateSub = AppState.addEventListener('change', (state) => {
+      if (state === 'background' || state === 'inactive') void flushPendingIcon();
+    });
+  }
+  return { changed: false, deferred: true };
 }

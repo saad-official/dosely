@@ -17,7 +17,7 @@ import {
   undo,
 } from '@dosely/shared';
 
-import { applyAppIcon } from '@/native/app-icon';
+import { applyAppIconWhenIdle } from '@/native/app-icon';
 import { cancelAllDoseNotifications } from '@/native/notifications';
 import { refreshSurfaces } from '@/native/surfaces';
 
@@ -219,7 +219,7 @@ export async function deleteProfile(id: string): Promise<void> {
 export async function updateSettings(patch: Partial<Settings>): Promise<Settings> {
   const next = writeSettings(patch);
   if ('theme' in patch || 'autoSeasonal' in patch || 'region' in patch) {
-    await applyAppIcon(effectiveTheme(next, todayKey()));
+    await applyAppIconWhenIdle(effectiveTheme(next, todayKey()));
     await refreshSurfaces({ skipNotifications: true });
   } else if ('escalationMinutes' in patch) {
     await refreshSurfaces();
@@ -229,7 +229,7 @@ export async function updateSettings(patch: Partial<Settings>): Promise<Settings
 
 /** Re-applies the effective theme's icon (call on launch and at local midnight). */
 export async function syncAppIconWithTheme(): Promise<void> {
-  await applyAppIcon(effectiveTheme(getSettings(), todayKey()));
+  await applyAppIconWhenIdle(effectiveTheme(getSettings(), todayKey()));
 }
 
 // ---------------------------------------------------------------------------
