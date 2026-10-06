@@ -5,7 +5,7 @@ import { AppText } from '@/components/app-text';
 import { Icon } from '@/components/icon';
 import { MedIcon, medColorHex } from '@/components/med-icon';
 import { icons } from '@/constants/icons';
-import { buildAppTheme, onSwatch, radius, spacing, useTheme, withAlpha } from '@/theme';
+import { buildAppTheme, hairline, onSwatchFor, radius, spacing, useTheme, withAlpha } from '@/theme';
 
 function MiniButton({ label, filled }: { label: string; filled?: boolean }) {
   const { colors } = useTheme();
@@ -65,8 +65,9 @@ export function NotificationArt() {
 
 /** Page 2: the dose-window Live Activity on a dark Lock Screen. */
 export function LiveActivityArt() {
-  const { colors, shadow, themeId } = useTheme();
-  // The Lock Screen is always dark: paint the mock with the current theme's dark palette.
+  const { shadow, themeId } = useTheme();
+  // The Lock Screen is always dark: paint the whole mock (accent included) with the theme's dark
+  // palette; the light-scheme accent is too deep to read on it.
   const lock = buildAppTheme(themeId, 'dark').colors;
   return (
     <View
@@ -76,6 +77,9 @@ export function LiveActivityArt() {
         backgroundColor: lock.surfaceSunken,
         borderRadius: radius.lg + 4,
         borderCurve: 'continuous',
+        // In dark mode the mock is darker than the page by a hair; the edge keeps it a "screen".
+        borderWidth: hairline,
+        borderColor: lock.border,
         padding: spacing.md,
         gap: spacing.md,
         boxShadow: shadow('lg'),
@@ -86,7 +90,7 @@ export function LiveActivityArt() {
       </AppText>
       <View style={{ backgroundColor: withAlpha(lock.text, 0.1), borderRadius: radius.md, padding: spacing.md, gap: spacing.sm }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-          <Icon name={icons.today} size={18} color={colors.accent} />
+          <Icon name={icons.today} size={18} color={lock.accent} />
           <AppText variant="callout" weight="600" maxFontSizeMultiplier={1.3} style={{ flex: 1, color: lock.text }}>
             Morning doses · 2 due
           </AppText>
@@ -95,11 +99,11 @@ export function LiveActivityArt() {
           </AppText>
         </View>
         <View style={{ height: 6, borderRadius: 3, backgroundColor: withAlpha(lock.text, 0.15), overflow: 'hidden' }}>
-          <View style={{ width: '22%', height: 6, backgroundColor: colors.accent }} />
+          <View style={{ width: '22%', height: 6, backgroundColor: lock.accent }} />
         </View>
         <View style={{ flexDirection: 'row', gap: spacing.sm, paddingTop: spacing.xs }}>
-          <View style={{ flex: 1, minHeight: 38, borderRadius: radius.sm, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' }}>
-            <AppText variant="callout" weight="600" maxFontSizeMultiplier={1.3} style={{ color: colors.onAccent }}>
+          <View style={{ flex: 1, minHeight: 38, borderRadius: radius.sm, backgroundColor: lock.accent, alignItems: 'center', justifyContent: 'center' }}>
+            <AppText variant="callout" weight="600" maxFontSizeMultiplier={1.3} style={{ color: lock.onAccent }}>
               Taken all
             </AppText>
           </View>
@@ -140,7 +144,7 @@ export function CircleArt() {
               justifyContent: 'center',
             }}
           >
-            <AppText variant="headline" weight="700" maxFontSizeMultiplier={1.2} style={{ color: onSwatch }}>
+            <AppText variant="headline" weight="700" maxFontSizeMultiplier={1.2} style={{ color: onSwatchFor(p.color) }}>
               {p.initial}
             </AppText>
           </View>

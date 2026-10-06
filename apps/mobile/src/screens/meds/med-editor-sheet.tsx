@@ -67,7 +67,7 @@ function StepIndicator({ step, onJump }: { step: number; onJump?: (i: number) =>
             accessibilityLabel={`Step ${i + 1} of ${STEPS.length}: ${label}`}
             disabled={!onJump}
             onPress={() => onJump?.(i)}
-            style={{ flex: 1, gap: spacing.xs, minHeight: touchTarget - 8, justifyContent: 'center' }}
+            style={({ pressed }) => ({ flex: 1, gap: spacing.xs, minHeight: touchTarget, justifyContent: 'center', opacity: pressed ? 0.6 : 1 })}
           >
             <View style={{ height: 4, borderRadius: 2, backgroundColor: active || done ? colors.accent : colors.track }} />
             <AppText variant="caption" tone={active ? 'accent' : 'secondary'} weight={active ? '700' : '500'} numberOfLines={1} maxFontSizeMultiplier={CHROME_FONT_CAP}>
@@ -96,10 +96,10 @@ function IconGrid({ value, color, onChange }: { value: MedIconName; color: MedCo
               haptics.selection();
               onChange(icon);
             }}
-            style={{ padding: 3, borderRadius: radius.pill, borderWidth: 2.5, borderColor: selected ? colors.text : 'transparent' }}
+            style={({ pressed }) => ({ padding: 3, borderRadius: radius.pill, borderWidth: 2.5, borderColor: selected ? colors.text : 'transparent', opacity: pressed ? 0.7 : 1 })}
           >
             {selected ? <MedIcon icon={icon} color={color} size={touchTarget} /> : (
-              <View style={{ width: touchTarget, height: touchTarget, borderRadius: radius.pill, backgroundColor: colors.surfaceSunken, alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ width: touchTarget, height: touchTarget, borderRadius: radius.pill, backgroundColor: colors.track, alignItems: 'center', justifyContent: 'center' }}>
                 <Icon name={medIcons[icon]} size={20} color={colors.textSecondary} />
               </View>
             )}

@@ -3,12 +3,13 @@ import { ActivityIndicator, Pressable, type StyleProp, type ViewStyle } from 're
 import Animated from 'react-native-reanimated';
 
 import type { IconName } from '@/constants/icons';
-import { CHROME_FONT_CAP, cssEasing, doseTarget, radius, spacing, touchTarget, useTheme } from '@/theme';
+import { CHROME_FONT_CAP, cssEasing, doseTarget, radius, spacing, touchTarget, useTheme, withAlpha } from '@/theme';
 
 import { AppText } from './app-text';
 import { Icon } from './icon';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
+/** `tonal`: a secondary action on a tinted surface (the Due-now card), where `secondary` would vanish. */
+export type ButtonVariant = 'primary' | 'secondary' | 'tonal' | 'ghost' | 'destructive';
 export type ButtonSize = 'md' | 'lg';
 
 export type PrimaryButtonProps = {
@@ -39,16 +40,20 @@ export function PrimaryButton({
   accessibilityHint,
   style,
 }: PrimaryButtonProps) {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [pressed, setPressed] = useState(false);
   const inactive = !!disabled || !!loading;
 
   const fill = {
     primary: { bg: colors.accent, fg: colors.onAccent },
     secondary: { bg: colors.accentSoft, fg: colors.accentText },
+    tonal: { bg: isDark ? withAlpha(colors.text, 0.12) : colors.surfaceElevated, fg: colors.accentText },
     ghost: { bg: 'transparent', fg: colors.accentText },
     destructive: { bg: colors.dangerSoft, fg: colors.danger },
   }[variant];
+  // Disabled: a neutral fill + tertiary label instead of 45% opacity (a faded accent reads as a
+  // washed-out but live button, and translucency lets the page show through on cards).
+  const face = disabled ? { bg: variant === 'ghost' ? 'transparent' : colors.track, fg: colors.textTertiary } : fill;
 
   const height = size === 'lg' ? doseTarget : Math.max(touchTarget, 48);
 
@@ -72,12 +77,11 @@ export function PrimaryButton({
           paddingVertical: spacing.sm,
           borderRadius: radius.md,
           borderCurve: 'continuous',
-          backgroundColor: fill.bg,
+          backgroundColor: face.bg,
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
           gap: spacing.sm,
-          opacity: disabled ? 0.45 : 1,
           transform: [{ scale: pressed && !inactive ? 0.97 : 1 }],
           transitionProperty: 'transform',
           transitionDuration: 120,
@@ -85,15 +89,15 @@ export function PrimaryButton({
         }}
       >
         {loading ? (
-          <ActivityIndicator color={fill.fg} />
+          <ActivityIndicator color={face.fg} />
         ) : (
           <>
-            {icon ? <Icon name={icon} size={size === 'lg' ? 22 : 18} color={fill.fg} weight="semibold" /> : null}
+            {icon ? <Icon name={icon} size={size === 'lg' ? 22 : 18} color={face.fg} weight="semibold" /> : null}
             <AppText
               variant={size === 'lg' ? 'body' : 'callout'}
               weight="600"
               maxFontSizeMultiplier={CHROME_FONT_CAP}
-              style={{ color: fill.fg, flexShrink: 1 }}
+              style={{ color: face.fg, flexShrink: 1 }}
               numberOfLines={2}
               align="center"
             >

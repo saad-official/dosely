@@ -15,7 +15,7 @@ import { addProfile, deleteProfile, renameProfile } from '@/data';
 import { useMedications } from '@/hooks/use-medications';
 import { useProfile, useProfiles } from '@/hooks/use-profiles';
 import { haptics } from '@/native/haptics';
-import { onSwatch } from '@/theme';
+import { onSwatchFor } from '@/theme';
 
 /** Add a person you look after, or rename / recolour / remove one. */
 export function ProfileEditorSheet() {
@@ -80,7 +80,7 @@ export function ProfileEditorSheet() {
     <FormSheet title={existing ? 'Edit person' : 'Add a person'} primaryLabel="Save" onPrimary={() => void save()} busy={busy}>
       <View style={{ alignItems: 'center' }}>
         <View style={{ width: 72, height: 72, borderRadius: 36, backgroundColor: medColorHex(color), alignItems: 'center', justifyContent: 'center' }}>
-          <AppText variant="title" weight="700" maxFontSizeMultiplier={1.2} style={{ color: onSwatch }}>
+          <AppText variant="title" weight="700" maxFontSizeMultiplier={1.2} style={{ color: onSwatchFor(medColorHex(color)) }}>
             {initialFor(name)}
           </AppText>
         </View>

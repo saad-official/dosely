@@ -159,15 +159,25 @@ export type ShadowToken = {
   offsetY: number;
   blur: number;
   spread: number;
-  /** Shadow colour is always ink (`SHADOW_COLOR`); opacity carries the weight. */
+  /** Shadow colour comes from `SHADOW_COLORS[scheme]`; opacity carries the weight. */
   opacity: number;
   /** Android elevation equivalent. */
   elevation: number;
 };
 
+/** Light-scheme shadow ink (kept for existing imports). */
 export const SHADOW_COLOR = "#1C2430";
 
-/** Soft, diffuse shadows. Dark mode leans on elevated surfaces, so shadows are deeper but rarer. */
+/**
+ * Shadow colour per scheme. Dark mode must use black: the ink (`#1C2430`) is lighter than every
+ * dark surface (`#101417`, `#0C1122`, ...), so an ink shadow there reads as a pale glow.
+ */
+export const SHADOW_COLORS = { light: SHADOW_COLOR, dark: "#000000" } as const satisfies Record<ColorScheme, string>;
+
+/**
+ * Soft, diffuse shadows. Dark mode leans on elevated (lighter) surfaces for depth, so its shadows
+ * stay subtle: black at a modest opacity, only enough to seat a card on the page.
+ */
 export const shadows = {
   light: {
     sm: { offsetX: 0, offsetY: 1, blur: 3, spread: 0, opacity: 0.06, elevation: 1 },
@@ -175,9 +185,9 @@ export const shadows = {
     lg: { offsetX: 0, offsetY: 24, blur: 48, spread: -16, opacity: 0.2, elevation: 12 },
   },
   dark: {
-    sm: { offsetX: 0, offsetY: 1, blur: 3, spread: 0, opacity: 0.4, elevation: 1 },
-    md: { offsetX: 0, offsetY: 8, blur: 24, spread: -6, opacity: 0.5, elevation: 4 },
-    lg: { offsetX: 0, offsetY: 24, blur: 48, spread: -16, opacity: 0.6, elevation: 12 },
+    sm: { offsetX: 0, offsetY: 1, blur: 3, spread: 0, opacity: 0.24, elevation: 1 },
+    md: { offsetX: 0, offsetY: 8, blur: 24, spread: -6, opacity: 0.32, elevation: 4 },
+    lg: { offsetX: 0, offsetY: 24, blur: 48, spread: -16, opacity: 0.4, elevation: 12 },
   },
 } as const satisfies Record<ColorScheme, Record<"sm" | "md" | "lg", ShadowToken>>;
 export type ShadowLevel = keyof (typeof shadows)["light"];
@@ -191,10 +201,11 @@ function kebab(value: string): string {
   return value.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
 }
 
-function shadowCss(shadow: ShadowToken): string {
-  const r = parseInt(SHADOW_COLOR.slice(1, 3), 16);
-  const g = parseInt(SHADOW_COLOR.slice(3, 5), 16);
-  const b = parseInt(SHADOW_COLOR.slice(5, 7), 16);
+function shadowCss(shadow: ShadowToken, scheme: ColorScheme): string {
+  const ink = SHADOW_COLORS[scheme];
+  const r = parseInt(ink.slice(1, 3), 16);
+  const g = parseInt(ink.slice(3, 5), 16);
+  const b = parseInt(ink.slice(5, 7), 16);
   return `${shadow.offsetX} ${shadow.offsetY}px ${shadow.blur}px ${shadow.spread}px rgb(${r} ${g} ${b} / ${shadow.opacity})`;
 }
 
@@ -221,6 +232,6 @@ export function toCssVars(scheme: ColorScheme, palette: Partial<ColorPalette> = 
   for (const [name, points] of Object.entries(motion.easing)) {
     vars[`--do-ease-${name}`] = `cubic-bezier(${points.join(", ")})`;
   }
-  for (const [name, shadow] of Object.entries(shadows[scheme])) vars[`--do-shadow-${name}`] = shadowCss(shadow);
+  for (const [name, shadow] of Object.entries(shadows[scheme])) vars[`--do-shadow-${name}`] = shadowCss(shadow, scheme);
   return vars;
 }

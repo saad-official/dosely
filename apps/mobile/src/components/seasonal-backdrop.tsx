@@ -11,14 +11,14 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useTheme, withAlpha, type ThemeColors } from '@/theme';
+import { motifTint, useTheme, type ThemeColors } from '@/theme';
 
 /**
  * Seasonal motif layer for the Today header: one subtle, low-contrast particle field per theme motif
  * (snow, hearts, clover, eggs, maple, stars, leaves, pumpkins, string lights). Pure Views (rounded
  * rects, rotations), at most 16 particles, each driven by one looping shared value on the UI thread.
  * Particles only spawn inside `lanes` (horizontal bands the caller keeps free of text), never
- * receive touches and are hidden from screen readers. With Reduce Motion they hold still.
+ * receive touches and are hidden from screen readers. With Reduce Motion the layer is not drawn.
  */
 
 export type Lane = { start: number; end: number };
@@ -167,7 +167,7 @@ export function MotifShape({ motif, size: s, c, variant }: { motif: Exclude<Moti
           style={{
             width: w,
             height: s,
-            backgroundColor: variant % 3 === 1 ? withAlpha(c.warning, 0.22) : main,
+            backgroundColor: variant % 3 === 1 ? motifTint(c.warning, c.surface) : main,
             borderTopLeftRadius: w,
             borderBottomRightRadius: w,
             borderTopRightRadius: 2,
@@ -190,7 +190,7 @@ export function MotifShape({ motif, size: s, c, variant }: { motif: Exclude<Moti
       const h = s * 0.8;
       return (
         <View style={{ width: s, height: s }}>
-          <View style={abs({ left: s * 0.46, top: 0, width: s * 0.1, height: s * 0.24, borderRadius: s * 0.04, backgroundColor: withAlpha(c.success, 0.3) })} />
+          <View style={abs({ left: s * 0.46, top: 0, width: s * 0.1, height: s * 0.24, borderRadius: s * 0.04, backgroundColor: motifTint(c.success, c.surface) })} />
           <View style={abs({ left: 0, top: s * 0.18, width: s, height: h, borderRadius: h / 2, backgroundColor: main })} />
           <View
             style={abs({ left: s * 0.28, top: s * 0.18, width: s * 0.44, height: h, borderRadius: s * 0.22, borderWidth: 1.5, borderColor: soft })}
@@ -200,7 +200,7 @@ export function MotifShape({ motif, size: s, c, variant }: { motif: Exclude<Moti
     }
     case 'lights': {
       const bulbs = [c.accent, c.warning, c.success, c.danger];
-      const color = withAlpha(bulbs[variant % bulbs.length]!, 0.55);
+      const color = motifTint(bulbs[variant % bulbs.length]!, c.surface, 'bulb');
       return (
         <View style={{ width: s, height: s * 1.5, alignItems: 'center' }}>
           <View style={{ width: s * 0.5, height: s * 0.32, borderRadius: 1.5, backgroundColor: soft }} />
@@ -221,7 +221,6 @@ function ParticleView({
   behaviour,
   spin,
   colors,
-  still,
 }: {
   p: Particle;
   motif: Exclude<Motif, 'none'>;
@@ -229,14 +228,12 @@ function ParticleView({
   behaviour: Behaviour;
   spin: boolean;
   colors: ThemeColors;
-  still: boolean;
 }) {
   const t = useSharedValue(0);
 
   useEffect(() => {
-    if (still) return;
     t.set(withRepeat(withTiming(1, { duration: p.period, easing: Easing.linear }), -1, false));
-  }, [p.period, still, t]);
+  }, [p.period, t]);
 
   const style = useAnimatedStyle(() => {
     const k = (t.get() + p.phase) % 1;
@@ -344,7 +341,8 @@ export type SeasonalBackdropProps = {
 export function SeasonalBackdrop({ motif, height, lanes }: SeasonalBackdropProps) {
   const { colors } = useTheme();
   const reduced = useReducedMotion();
-  if (motif === 'none' || height <= 0 || lanes.length === 0) return null;
+  // Reduce Motion: the layer is purely decorative motion, so it is left out entirely.
+  if (motif === 'none' || reduced || height <= 0 || lanes.length === 0) return null;
   const spec = SPECS[motif];
   const particles = motif === 'lights' ? lightsLayout(lanes, spec.count) : layout(motif, lanes, height);
   return (
@@ -365,7 +363,6 @@ export function SeasonalBackdrop({ motif, height, lanes }: SeasonalBackdropProps
           behaviour={spec.behaviour}
           spin={spec.spin}
           colors={colors}
-          still={reduced}
         />
       ))}
     </View>

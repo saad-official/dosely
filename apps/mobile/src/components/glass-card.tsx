@@ -25,7 +25,8 @@ export type GlassCardProps = {
 /**
  * A floating surface, reserved for the "due now" card and sheet chrome: Liquid Glass on iOS 26, a
  * system material blur on older iOS, and a solid elevated surface on Android or with Reduce
- * Transparency. Never nested, never opacity-animated (animate the content instead).
+ * Transparency. Only the solid surface casts a shadow: a shadow under a translucent material shows
+ * through it as a grey smudge. Never nested, never opacity-animated (animate the content instead).
  */
 export function GlassCard({ children, radius = 'lg', padding = spacing.md, tinted, gap, style }: GlassCardProps) {
   const { colors, shadow, isDark } = useTheme();
@@ -41,7 +42,7 @@ export function GlassCard({ children, radius = 'lg', padding = spacing.md, tinte
   }
   if (process.env.EXPO_OS === 'ios' && !reduce) {
     return (
-      <View style={[shape, { padding: 0, boxShadow: shadow('md') }, style]}>
+      <View style={[shape, { padding: 0 }, style]}>
         <BlurView
           tint={isDark ? 'systemThickMaterialDark' : 'systemThickMaterialLight'}
           intensity={90}

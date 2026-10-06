@@ -40,8 +40,11 @@ export function dismissToast(id?: number): void {
 const ENTER = FadeInDown.duration(motion.duration.base).easing(easing.standard);
 const EXIT = FadeOutDown.duration(motion.duration.fast + 50).easing(easing.standard);
 
-/** Room for the tab bar so toasts never cover it. */
-const TAB_BAR_CLEARANCE = 64;
+/**
+ * Room for the tab bar so toasts never cover it. iOS: the 49 pt bar (or the iOS 26 floating bar) and
+ * a gap. Android: the Material 3 navigation bar is 80 dp tall, so 64 left the toast overlapping it.
+ */
+const TAB_BAR_CLEARANCE = process.env.EXPO_OS === 'android' ? 80 + spacing.sm : 64;
 
 /** Mount once at the root. Undo for Taken / Skip lives here. */
 export function ToastHost() {

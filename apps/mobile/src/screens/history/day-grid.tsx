@@ -3,14 +3,16 @@ import { View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { formatDayShort, weekdayNarrow, weekdayShort, WEEKDAYS } from '@/constants/format';
-import { CHROME_FONT_CAP, radius, spacing, useTheme, withAlpha, type ThemeColors } from '@/theme';
+import { CHROME_FONT_CAP, mix, radius, spacing, readableOn, useTheme, type ThemeColors } from '@/theme';
 
+/** Day squares sit on the elevated card, so partial tints are blended into it (opaque, so the day
+ * number's colour can be picked against the real fill). */
 function fill(day: DaySummary, c: ThemeColors): string {
   if (day.total === 0) return c.track;
-  if (day.rate === null) return withAlpha(c.accent, 0.12);
+  if (day.rate === null) return mix(c.surfaceElevated, c.accent, 0.12);
   if (day.rate >= 0.999) return c.accent;
-  if (day.rate >= 0.75) return withAlpha(c.accent, 0.62);
-  if (day.rate >= 0.5) return withAlpha(c.accent, 0.36);
+  if (day.rate >= 0.75) return mix(c.surfaceElevated, c.accent, 0.62);
+  if (day.rate >= 0.5) return mix(c.surfaceElevated, c.accent, 0.36);
   if (day.rate > 0) return c.warningSoft;
   return c.dangerSoft;
 }
@@ -53,6 +55,7 @@ export function DayGrid({ days, large }: { days: DaySummary[]; large?: boolean }
             {Array.from({ length: 7 }, (_, i) => {
               const day = row[i];
               if (!day) return <View key={i} style={{ flex: 1, aspectRatio: 1 }} />;
+              const bg = fill(day, colors);
               return (
                 <View
                   key={day.dayKey}
@@ -63,7 +66,7 @@ export function DayGrid({ days, large }: { days: DaySummary[]; large?: boolean }
                     aspectRatio: 1,
                     borderRadius: large ? radius.sm : 6,
                     borderCurve: 'continuous',
-                    backgroundColor: fill(day, colors),
+                    backgroundColor: bg,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
@@ -73,7 +76,8 @@ export function DayGrid({ days, large }: { days: DaySummary[]; large?: boolean }
                       variant="caption"
                       weight="600"
                       maxFontSizeMultiplier={1.3}
-                      style={{ color: day.rate !== null && day.rate >= 0.75 ? colors.onAccent : colors.text }}
+                      // onAccent is white in several seasonal themes: on the 62% tint it fell to ~2.5:1.
+                      style={{ color: readableOn(bg, [colors.text, colors.onAccent]) }}
                     >
                       {day.dayKey.slice(8).replace(/^0/, '')}
                     </AppText>
@@ -91,7 +95,7 @@ export function DayGrid({ days, large }: { days: DaySummary[]; large?: boolean }
       >
         {[
           { c: colors.accent, t: 'All taken' },
-          { c: withAlpha(colors.accent, 0.36), t: 'Some' },
+          { c: mix(colors.surfaceElevated, colors.accent, 0.36), t: 'Some' },
           { c: colors.dangerSoft, t: 'Missed' },
           { c: colors.track, t: 'Nothing due' },
         ].map((l) => (

@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 
 import { icons } from '@/constants/icons';
 import { haptics } from '@/native/haptics';
-import { radius, spacing, touchTarget, useTheme } from '@/theme';
+import { onSwatchFor, radius, spacing, touchTarget, useTheme } from '@/theme';
 
 import { Icon } from './icon';
 
@@ -38,7 +38,7 @@ export function SwatchPicker({ value, onChange }: { value: MedColor; onChange: (
               haptics.selection();
               onChange(c.name);
             }}
-            style={{
+            style={({ pressed }) => ({
               width: touchTarget + 4,
               height: touchTarget + 4,
               borderRadius: radius.pill,
@@ -46,7 +46,8 @@ export function SwatchPicker({ value, onChange }: { value: MedColor; onChange: (
               borderColor: selected ? colors.text : 'transparent',
               alignItems: 'center',
               justifyContent: 'center',
-            }}
+              opacity: pressed ? 0.7 : 1,
+            })}
           >
             <View
               style={{
@@ -58,7 +59,7 @@ export function SwatchPicker({ value, onChange }: { value: MedColor; onChange: (
                 justifyContent: 'center',
               }}
             >
-              {selected ? <Icon name={icons.check} size={18} color="#FFFFFF" weight="bold" /> : null}
+              {selected ? <Icon name={icons.check} size={18} color={onSwatchFor(c.hex)} weight="bold" /> : null}
             </View>
           </Pressable>
         );

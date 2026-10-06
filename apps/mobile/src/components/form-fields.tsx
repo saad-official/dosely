@@ -5,7 +5,7 @@ import { Pressable, TextInput, View, type TextInputProps } from 'react-native';
 import { formatHhmm, hhmmToDate, toHhmm } from '@/constants/format';
 import { icons } from '@/constants/icons';
 import { haptics } from '@/native/haptics';
-import { CHROME_FONT_CAP, radius, spacing, textStyles, touchTarget, useTheme } from '@/theme';
+import { CHROME_FONT_CAP, hairline, radius, spacing, textStyles, touchTarget, useTheme } from '@/theme';
 
 import { AppText } from './app-text';
 import { Icon } from './icon';
@@ -61,8 +61,9 @@ export function TextField({ label, hint, error, style, multiline, ref, ...props 
             paddingVertical: spacing.sm + 4,
             minHeight: multiline ? 96 : touchTarget + spacing.sm,
             textAlignVertical: multiline ? 'top' : 'center',
-            borderWidth: error ? 1.5 : 0,
-            borderColor: colors.danger,
+            // The well alone is ~1.05:1 against the sheet in dark mode; a quiet edge keeps the field findable.
+            borderWidth: error ? 1.5 : hairline,
+            borderColor: error ? colors.danger : colors.border,
           },
           style,
         ]}
@@ -109,7 +110,7 @@ export function Stepper({
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.sm,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.track,
         borderRadius: radius.pill,
         padding: spacing.xs,
         alignSelf: 'flex-start',
@@ -160,7 +161,7 @@ export function ChoiceChips<T extends string | number>({
               borderRadius: radius.pill,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: selected ? colors.accent : pressed ? colors.border : colors.surfaceSunken,
+              backgroundColor: selected ? colors.accent : pressed ? colors.border : colors.track,
             })}
           >
             <AppText
@@ -215,7 +216,7 @@ export function TimeField({ value, onChange, label }: { value: string; onChange:
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing.sm,
-          backgroundColor: pressed ? colors.border : colors.surfaceSunken,
+          backgroundColor: pressed ? colors.border : colors.track,
         })}
       >
         <Icon name={icons.clock} size={18} color={colors.accentText} />

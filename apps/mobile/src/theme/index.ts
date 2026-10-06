@@ -6,7 +6,18 @@ import { Platform, StyleSheet } from 'react-native';
 export { fontWeight, motion, radius, shadows, spacing, type } from '@dosely/shared/tokens';
 export type { ColorScheme, RadiusToken, ShadowLevel, SpacingToken, TypeToken } from '@dosely/shared/tokens';
 export { cssEasing, easing, springs } from './motion';
-export { buildAppTheme, withAlpha, type AppTheme, type ThemeColors } from './palette';
+export {
+  buildAppTheme,
+  contrastRatio,
+  mix,
+  motifTint,
+  onSwatchFor,
+  readableOn,
+  withAlpha,
+  type AppTheme,
+  type MotifStrength,
+  type ThemeColors,
+} from './palette';
 export { AppThemeProvider } from './theme-provider';
 export { ThemeContext, useTheme } from './theme-context';
 export { CHROME_FONT_CAP, tabular, textStyles, typeStyle } from './typography';
@@ -20,6 +31,3 @@ export const touchTarget = Platform.select({ android: 48, default: 44 });
 
 /** Dose actions (Taken, Snooze, Log a dose) are bigger: tired hands, older eyes. */
 export const doseTarget = 56;
-
-/** Glyphs drawn on a medication colour swatch (MED_PALETTE hexes are mid-tones in both schemes). */
-export const onSwatch = '#FFFFFF';

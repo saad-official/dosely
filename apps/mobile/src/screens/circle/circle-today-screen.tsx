@@ -117,7 +117,17 @@ export function CircleTodayScreen() {
   const ownerName = circle?.ownerName || data?.ownerName;
 
   return (
-    <Screen refreshControl={<RefreshControl refreshing={today.refreshing} onRefresh={onRefresh} tintColor={colors.accent} />}>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={today.refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.accent}
+          colors={[colors.accent]}
+          progressBackgroundColor={colors.surfaceElevated}
+        />
+      }
+    >
       <Stack.Screen options={{ title: circle?.isOwner ? 'What your circle sees' : ownerName ? `${ownerName}'s day` : 'Caregiver view' }} />
 
       {!data && today.loading && !today.error ? <SkeletonList rows={4} /> : null}

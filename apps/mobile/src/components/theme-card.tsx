@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 import { icons } from '@/constants/icons';
-import { buildAppTheme, CHROME_FONT_CAP, cssEasing, radius, spacing, useTheme } from '@/theme';
+import { buildAppTheme, CHROME_FONT_CAP, cssEasing, hairline, motifTint, radius, spacing, useTheme } from '@/theme';
 
 import { AppText } from './app-text';
 import { Icon } from './icon';
@@ -44,6 +44,8 @@ export function ThemeCard({ themeId, selected, activeBadge, onPress }: ThemeCard
   const { colors, scheme } = useTheme();
   const preview = buildAppTheme(themeId, scheme);
   const p = preview.colors;
+  // The motif chip is a preview (never behind text): stronger than the Today layer so it reads at 11–16 pt.
+  const chip = { ...p, motifPrimary: motifTint(p.accent, p.surface, 'chip'), motifSecondary: motifTint(p.accentText, p.surface, 'primary') };
   const meta = THEMES[themeId];
   const [pressed, setPressed] = useState(false);
 
@@ -71,44 +73,55 @@ export function ThemeCard({ themeId, selected, activeBadge, onPress }: ThemeCard
           transitionTimingFunction: cssEasing.standard,
         }}
       >
-        {/* Miniature screen */}
+        {/* Miniature screen. The shadow sits on an opaque wrapper without clipping (a boxShadow on
+            an `overflow: hidden` view is clipped away or drawn wrong); the hairline gives the card an
+            edge where its surface matches the page (every dark theme). */}
         <View
           style={{
-            height: 132,
             borderRadius: radius.md,
             borderCurve: 'continuous',
             backgroundColor: p.surface,
-            overflow: 'hidden',
-            padding: spacing.sm + 2,
-            gap: spacing.sm,
             boxShadow: preview.shadow('sm'),
           }}
         >
-          {meta.motif !== 'none' ? (
-            <View pointerEvents="none" style={{ position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 4, alignItems: 'flex-end' }}>
-              <MotifShape motif={meta.motif} size={16} c={p} variant={0} />
-              <MotifShape motif={meta.motif} size={11} c={p} variant={1} />
+          <View
+            style={{
+              height: 132,
+              borderRadius: radius.md,
+              borderCurve: 'continuous',
+              borderWidth: hairline,
+              borderColor: preview.isDark ? p.border : p.separator,
+              overflow: 'hidden',
+              padding: spacing.sm + 2,
+              gap: spacing.sm,
+            }}
+          >
+            {meta.motif !== 'none' ? (
+              <View pointerEvents="none" style={{ position: 'absolute', top: 8, right: 8, flexDirection: 'row', gap: 4, alignItems: 'flex-end' }}>
+                <MotifShape motif={meta.motif} size={16} c={chip} variant={0} />
+                <MotifShape motif={meta.motif} size={11} c={chip} variant={1} />
+              </View>
+            ) : null}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
+              <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 5, borderColor: p.accent, borderTopColor: p.track }} />
+              <View style={{ gap: 4 }}>
+                <View style={{ width: 46, height: 6, borderRadius: 3, backgroundColor: p.text }} />
+                <View style={{ width: 30, height: 5, borderRadius: 3, backgroundColor: p.textSecondary }} />
+              </View>
             </View>
-          ) : null}
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-            <View style={{ width: 30, height: 30, borderRadius: 15, borderWidth: 5, borderColor: p.accent, borderTopColor: p.track }} />
-            <View style={{ gap: 4 }}>
-              <View style={{ width: 46, height: 6, borderRadius: 3, backgroundColor: p.text }} />
-              <View style={{ width: 30, height: 5, borderRadius: 3, backgroundColor: p.textSecondary }} />
+            <View style={{ backgroundColor: p.surfaceElevated, borderRadius: radius.sm, padding: spacing.sm, gap: 6 }}>
+              <View style={{ width: '70%', height: 6, borderRadius: 3, backgroundColor: p.text }} />
+              <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+                <View style={{ flex: 1, height: 18, borderRadius: 6, backgroundColor: p.accent }} />
+                <View style={{ flex: 1, height: 18, borderRadius: 6, backgroundColor: p.accentSoft }} />
+              </View>
             </View>
+            <Image
+              source={ICON_ART[themeId]}
+              style={{ position: 'absolute', right: spacing.sm, bottom: spacing.sm, width: 30, height: 30, borderRadius: 7 }}
+              accessible={false}
+            />
           </View>
-          <View style={{ backgroundColor: p.surfaceElevated, borderRadius: radius.sm, padding: spacing.sm, gap: 6 }}>
-            <View style={{ width: '70%', height: 6, borderRadius: 3, backgroundColor: p.text }} />
-            <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-              <View style={{ flex: 1, height: 18, borderRadius: 6, backgroundColor: p.accent }} />
-              <View style={{ flex: 1, height: 18, borderRadius: 6, backgroundColor: p.accentSoft }} />
-            </View>
-          </View>
-          <Image
-            source={ICON_ART[themeId]}
-            style={{ position: 'absolute', right: spacing.sm, bottom: spacing.sm, width: 30, height: 30, borderRadius: 7 }}
-            accessible={false}
-          />
         </View>
 
         {/* Name */}

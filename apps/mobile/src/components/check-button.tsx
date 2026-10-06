@@ -55,7 +55,8 @@ export function CheckButton({ checked, onPress, label, hint, size = doseTarget }
           height: size,
           borderRadius: radius.pill,
           borderWidth: 2.5,
-          borderColor: checked ? colors.accent : colors.border,
+          // The unchecked ring is the dose action's only outline: textTertiary keeps it >= 3:1 (border was ~1.5:1).
+          borderColor: checked ? colors.accent : colors.textTertiary,
           alignItems: 'center',
           justifyContent: 'center',
         }}

@@ -37,13 +37,13 @@ function HeaderButton({
         paddingHorizontal: spacing.sm,
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: disabled ? 0.4 : pressed ? 0.6 : 1,
+        opacity: pressed ? 0.6 : 1,
       })}
     >
       {busy ? (
         <ActivityIndicator color={colors.accentText} />
       ) : (
-        <AppText variant="body" weight={emphasis ? '700' : '400'} tone="accent" maxFontSizeMultiplier={CHROME_FONT_CAP}>
+        <AppText variant="body" weight={emphasis ? '700' : '400'} tone={disabled ? 'tertiary' : 'accent'} maxFontSizeMultiplier={CHROME_FONT_CAP}>
           {label}
         </AppText>
       )}

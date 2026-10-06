@@ -32,8 +32,9 @@ export function IconButton({
 }: IconButtonProps) {
   const { colors } = useTheme();
   const [pressed, setPressed] = useState(false);
-  const bg = variant === 'filled' ? colors.accent : variant === 'tinted' ? colors.accentSoft : 'transparent';
-  const fg = variant === 'filled' ? colors.onAccent : colors.accentText;
+  // Disabled: neutral fill + tertiary glyph rather than 40% opacity.
+  const bg = variant === 'plain' ? 'transparent' : disabled ? colors.track : variant === 'filled' ? colors.accent : colors.accentSoft;
+  const fg = disabled ? colors.textTertiary : variant === 'filled' ? colors.onAccent : colors.accentText;
   return (
     <Pressable
       accessibilityRole="button"
@@ -54,7 +55,6 @@ export function IconButton({
           backgroundColor: bg,
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: disabled ? 0.4 : 1,
           transform: [{ scale: pressed ? 0.94 : 1 }],
           transitionProperty: 'transform',
           transitionDuration: 120,

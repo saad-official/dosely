@@ -24,7 +24,7 @@ import { useSettings } from '@/hooks/use-settings';
 import { shareHistoryCsv } from '@/native/exports';
 import { haptics } from '@/native/haptics';
 import { openNotificationSettings, requestNotificationPermission } from '@/native/notifications';
-import { onSwatch, spacing } from '@/theme';
+import { onSwatchFor, spacing } from '@/theme';
 
 
 import { EscalationSlider } from './escalation-slider';
@@ -39,7 +39,7 @@ const APPEARANCE = [
 function ProfileAvatar({ initial, color }: { initial: string; color: string }) {
   return (
     <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: medColorHex(color), alignItems: 'center', justifyContent: 'center' }}>
-      <AppText variant="callout" weight="700" maxFontSizeMultiplier={1.3} style={{ color: onSwatch }}>
+      <AppText variant="callout" weight="700" maxFontSizeMultiplier={1.3} style={{ color: onSwatchFor(medColorHex(color)) }}>
         {initial}
       </AppText>
     </View>

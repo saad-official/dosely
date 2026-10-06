@@ -10,12 +10,12 @@ import { Icon } from './icon';
 type Meta = { label: string; fg: keyof ThemeColors; bg: keyof ThemeColors; icon?: IconName };
 
 const META: Record<DoseState, Meta> = {
-  upcoming: { label: 'Upcoming', fg: 'textSecondary', bg: 'surfaceSunken' },
+  upcoming: { label: 'Upcoming', fg: 'textSecondary', bg: 'track' },
   due: { label: 'Due now', fg: 'onAccent', bg: 'accent' },
   late: { label: 'Late', fg: 'warning', bg: 'warningSoft', icon: icons.clock },
   missed: { label: 'Missed', fg: 'danger', bg: 'dangerSoft', icon: icons.warning },
   taken: { label: 'Taken', fg: 'success', bg: 'successSoft', icon: icons.check },
-  skipped: { label: 'Skipped', fg: 'textSecondary', bg: 'surfaceSunken', icon: icons.skip },
+  skipped: { label: 'Skipped', fg: 'textSecondary', bg: 'track', icon: icons.skip },
   snoozed: { label: 'Snoozed', fg: 'accentText', bg: 'accentSoft', icon: icons.snooze },
 };
 
@@ -52,7 +52,7 @@ export function StatePill({ state, label }: { state: DoseState; label?: string }
 export function InfoPill({ label, tone = 'neutral', icon }: { label: string; tone?: 'neutral' | 'warning' | 'accent'; icon?: IconName }) {
   const { colors } = useTheme();
   const fg = tone === 'warning' ? colors.warning : tone === 'accent' ? colors.accentText : colors.textSecondary;
-  const bg = tone === 'warning' ? colors.warningSoft : tone === 'accent' ? colors.accentSoft : colors.surfaceSunken;
+  const bg = tone === 'warning' ? colors.warningSoft : tone === 'accent' ? colors.accentSoft : colors.track;
   return (
     <View
       style={{

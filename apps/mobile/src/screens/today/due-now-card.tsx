@@ -57,7 +57,7 @@ export function DueNowCard({ doses, endsAt }: { doses: DoseView[]; endsAt: strin
             style={{ flex: 1.4 }}
             onPress={() => takeAll(ids)}
           />
-          <PrimaryButton title="Snooze 10" icon={icons.snooze} size="lg" variant="secondary" style={{ flex: 1 }} onPress={() => snoozeAll(ids, 10)} />
+          <PrimaryButton title="Snooze 10" icon={icons.snooze} size="lg" variant="tonal" style={{ flex: 1 }} onPress={() => snoozeAll(ids, 10)} />
         </View>
       </GlassCard>
     </View>

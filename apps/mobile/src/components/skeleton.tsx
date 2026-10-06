@@ -8,7 +8,7 @@ const PULSE = {
   to: { opacity: 0.5 },
 };
 
-/** A placeholder block that softly pulses (static with Reduce Motion). */
+/** A placeholder block that softly pulses (static with Reduce Motion). `track` reads on both the page and cards. */
 export function Skeleton({ width = '100%', height = 16, radius = 'sm' }: { width?: DimensionValue; height?: number; radius?: RadiusToken }) {
   const { colors } = useTheme();
   const reduced = useReducedMotion();
@@ -19,7 +19,7 @@ export function Skeleton({ width = '100%', height = 16, radius = 'sm' }: { width
         width,
         height,
         borderRadius: radii[radius],
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.track,
         ...(reduced
           ? null
           : {
