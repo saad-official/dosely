@@ -75,14 +75,12 @@ export function setupNotifications(): Promise<void> {
           lockscreenVisibility: Notifications.AndroidNotificationVisibility.PRIVATE,
           vibrationPattern: [0, 250, 150, 250],
           enableVibrate: true,
-          sound: 'default',
         });
         await Notifications.setNotificationChannelAsync(CHANNEL_CAREGIVER, {
           name: 'Caregiver alerts',
           description: 'When someone in your circle has not marked a dose.',
           importance: Notifications.AndroidImportance.HIGH,
           lockscreenVisibility: Notifications.AndroidNotificationVisibility.PRIVATE,
-          sound: 'default',
         });
         // expo-live-updates creates this channel at default importance; the reminder already
         // chimed on `doses`, so the ongoing window status stays silent.
