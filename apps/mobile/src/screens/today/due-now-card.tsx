@@ -54,7 +54,7 @@ export function DueNowCard({ doses, endsAt }: { doses: DoseView[]; endsAt: strin
             title={doses.length > 1 ? 'Taken all' : 'Taken'}
             icon={icons.check}
             size="lg"
-            style={{ flex: 1.4 }}
+            style={{ flex: 1 }}
             onPress={() => takeAll(ids)}
           />
           <PrimaryButton title="Snooze 10" icon={icons.snooze} size="lg" variant="tonal" style={{ flex: 1 }} onPress={() => snoozeAll(ids, 10)} />

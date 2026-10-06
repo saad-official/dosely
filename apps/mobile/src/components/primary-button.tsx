@@ -98,7 +98,9 @@ export function PrimaryButton({
               weight="600"
               maxFontSizeMultiplier={CHROME_FONT_CAP}
               style={{ color: face.fg, flexShrink: 1 }}
-              numberOfLines={2}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
               align="center"
             >
               {title}

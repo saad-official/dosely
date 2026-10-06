@@ -1,6 +1,6 @@
 import type { Profile } from '@dosely/shared';
 import { Link, router, Stack } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { Pressable, View, Platform } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { EmptyState } from '@/components/empty-state';
@@ -22,15 +22,20 @@ function MedRow({ med, profileName }: { med: MedicationView; profileName?: strin
   const { colors } = useTheme();
   const supply = inventorySummary(med.inventoryCount, med.daysLeft);
   const archived = !!med.archivedAt;
-  return (
-    <Link href={{ pathname: '/meds/[id]', params: { id: med.id } }} asChild>
-      <Link.Trigger>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={[med.name, med.strength, profileName ? `for ${profileName}` : null, scheduleSummary(med.schedule), supply, archived ? 'archived' : null]
-            .filter(Boolean)
-            .join(', ')}
-          style={({ pressed }) => ({
+  const href = { pathname: '/meds/[id]', params: { id: med.id } } as const;
+  // `Link asChild` merges its own style with the child's, so a function-valued Pressable style is
+  // dropped (the row then stacks vertically). Keep the Pressable unstyled and lay the row out in a
+  // child View that reads the pressed state.
+  const row = (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={[med.name, med.strength, profileName ? `for ${profileName}` : null, scheduleSummary(med.schedule), supply, archived ? 'archived' : null]
+        .filter(Boolean)
+        .join(', ')}
+    >
+      {({ pressed }) => (
+        <View
+          style={{
             flexDirection: 'row',
             alignItems: 'center',
             gap: spacing.md,
@@ -38,7 +43,7 @@ function MedRow({ med, profileName }: { med: MedicationView; profileName?: strin
             paddingVertical: spacing.sm + 4,
             backgroundColor: pressed ? colors.surfaceSunken : colors.surfaceElevated,
             opacity: archived ? 0.7 : 1,
-          })}
+          }}
         >
           <MedIcon icon={med.icon} color={med.color} size={44} />
           <View style={{ flex: 1, gap: spacing.xs }}>
@@ -51,8 +56,22 @@ function MedRow({ med, profileName }: { med: MedicationView; profileName?: strin
             {supply ? <InfoPill label={supply} tone={med.needsRefill ? 'warning' : 'neutral'} icon={med.needsRefill ? icons.refill : undefined} /> : null}
           </View>
           <Icon name={icons.chevronForward} size={14} color={colors.textTertiary} weight="semibold" directional />
-        </Pressable>
-      </Link.Trigger>
+        </View>
+      )}
+    </Pressable>
+  );
+  // Link.Trigger / Link.Preview (press-and-hold peek) is an iOS feature; on Android the wrapper
+  // drops the row's styles and stacks its children, so the row links directly there.
+  if (Platform.OS !== 'ios') {
+    return (
+      <Link href={href} asChild>
+        {row}
+      </Link>
+    );
+  }
+  return (
+    <Link href={href} asChild>
+      <Link.Trigger>{row}</Link.Trigger>
       <Link.Preview />
     </Link>
   );
