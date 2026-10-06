@@ -245,7 +245,8 @@
             }
           }
         ]
-      ]
+      ],
+      "./plugins/with-alias-intent-filters.js"
     ],
     "experiments": {
       "typedRoutes": true,
