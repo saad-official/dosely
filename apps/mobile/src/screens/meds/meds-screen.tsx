@@ -111,7 +111,7 @@ export function MedsScreen() {
           icon={icons.meds}
           title="No medications yet"
           body="Add each medicine once with its schedule. Dosely takes care of the reminders."
-          action={<PrimaryButton title="Add medication" icon={icons.add} size="lg" block={false} onPress={() => router.push('/med-editor')} />}
+          action={<PrimaryButton title="Add medication" icon={icons.add} size="lg" block={false} style={{ alignSelf: 'center' }} onPress={() => router.push('/med-editor')} />}
         />
       </Screen>
     );

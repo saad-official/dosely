@@ -156,7 +156,7 @@ export function TodayScreen() {
           icon={icons.today}
           title="Add your first medication"
           body="Tell Dosely what you take and when. Reminders, the Lock Screen countdown and your history follow from there."
-          action={<PrimaryButton title="Add medication" icon={icons.add} size="lg" block={false} onPress={() => router.push('/med-editor')} />}
+          action={<PrimaryButton title="Add medication" icon={icons.add} size="lg" block={false} style={{ alignSelf: 'center' }} onPress={() => router.push('/med-editor')} />}
         />
       </Screen>
     );

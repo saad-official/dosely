@@ -50,6 +50,15 @@ export function MedDetailScreen() {
   const stats = report?.perMed.find((m) => m.medicationId === med.id);
   const archived = !!med.archivedAt;
   const supply = inventorySummary(med.inventoryCount, med.daysLeft);
+  // The list row keeps the short count on the right; the longer refill sentence goes under the title
+  // so neither side has to wrap into a narrow column.
+  const [supplyCount, supplyRefill] = supply ? supply.split(' · ') : [null, null];
+  const supplyDetail = [
+    supplyRefill ? supplyRefill.charAt(0).toUpperCase() + supplyRefill.slice(1) : null,
+    med.refillDate && med.daysLeft !== null ? `runs out around ${formatDayShort(med.refillDate)}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ') || undefined;
 
   const toggleArchive = () => {
     haptics.selection();
@@ -108,8 +117,8 @@ export function MedDetailScreen() {
         ) : null}
         <ListRow
           title="Supply"
-          value={supply ?? 'Not tracked'}
-          subtitle={med.refillDate && med.daysLeft !== null ? `Runs out around ${formatDayShort(med.refillDate)}` : undefined}
+          value={supplyCount ?? 'Not tracked'}
+          subtitle={supplyDetail}
           icon={icons.refill}
           onPress={() => router.push({ pathname: '/inventory', params: { id: med.id } })}
           accessibilityHint="Set how many you have"

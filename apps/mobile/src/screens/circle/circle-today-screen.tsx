@@ -88,7 +88,7 @@ export function CircleTodayScreen() {
             icon={icons.circle}
             title="Sign in to see this circle"
             body="Caregiver views are only available to circle members."
-            action={<PrimaryButton title="Sign in" block={false} onPress={() => router.push({ pathname: '/auth', params: { mode: 'sign-in' } })} />}
+            action={<PrimaryButton title="Sign in" block={false} style={{ alignSelf: 'center' }} onPress={() => router.push({ pathname: '/auth', params: { mode: 'sign-in' } })} />}
           />
         )}
       </Screen>
@@ -137,7 +137,7 @@ export function CircleTodayScreen() {
           icon={icons.warning}
           title="Couldn't load today"
           body={today.error}
-          action={<PrimaryButton title="Try again" block={false} loading={today.refreshing} onPress={onRefresh} />}
+          action={<PrimaryButton title="Try again" block={false} style={{ alignSelf: 'center' }} loading={today.refreshing} onPress={onRefresh} />}
         />
       ) : null}
 
