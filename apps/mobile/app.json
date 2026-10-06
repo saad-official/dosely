@@ -12,7 +12,8 @@
     },
     "updates": {
       "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/0141371e-9e84-44f8-a29f-e88b4ce7e108"
     },
     "ios": {
       "bundleIdentifier": "com.saadofficial.dosely",
@@ -21,6 +22,9 @@
       "infoPlist": {
         "NSSupportsLiveActivities": true,
         "UIBackgroundModes": [
+          "fetch",
+          "remote-notification",
+          "processing",
           "fetch",
           "remote-notification",
           "processing"
@@ -40,6 +44,11 @@
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.POST_PROMOTED_NOTIFICATIONS",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.POST_PROMOTED_NOTIFICATIONS",
         "android.permission.SCHEDULE_EXACT_ALARM",
@@ -241,6 +250,30 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ExpoWidgetsTarget",
+                  "bundleIdentifier": "com.saadofficial.dosely.widgets",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.saadofficial.dosely"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "0141371e-9e84-44f8-a29f-e88b4ce7e108"
+      }
+    },
+    "owner": "sadi123"
   }
 }
