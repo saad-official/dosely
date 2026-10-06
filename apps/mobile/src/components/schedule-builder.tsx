@@ -10,7 +10,6 @@ import { AppText } from './app-text';
 import { ChoiceChips, Field, Stepper, TimeField } from './form-fields';
 import { IconButton } from './icon-button';
 import { PrimaryButton } from './primary-button';
-import { SegmentedControl } from './segmented-control';
 
 export type ScheduleKind = 'times' | 'interval' | 'weekdays' | 'as-needed';
 
@@ -144,12 +143,18 @@ function TimesList({ draft, onChange }: { draft: ScheduleDraft; onChange: (d: Sc
 export function ScheduleBuilder({ draft, onChange }: { draft: ScheduleDraft; onChange: (d: ScheduleDraft) => void }) {
   return (
     <View style={{ gap: spacing.lg }}>
-      <SegmentedControl
-        accessibilityLabel="How often"
-        options={KINDS}
-        value={draft.kind}
-        onChange={(kind) => onChange({ ...draft, kind })}
-      />
+      {/* Four labels wrap inside a segmented control on narrow phones, so the kind picker uses the
+          same single-choice chips as the Form field above it. */}
+      <Field label="How often">
+        <ChoiceChips
+          accessibilityLabel="How often"
+          options={KINDS}
+          isSelected={(kind) => draft.kind === kind}
+          onToggle={(kind) => {
+            if (kind !== draft.kind) onChange({ ...draft, kind });
+          }}
+        />
+      </Field>
 
       {draft.kind === 'times' ? <TimesList draft={draft} onChange={onChange} /> : null}
 

@@ -152,8 +152,8 @@ export function SettingsScreen() {
           <ListRow
             title="Quiet hours"
             icon={icons.moon}
-            value={settings.quietHours ? `${formatHhmm(settings.quietHours.start)}–${formatHhmm(settings.quietHours.end)}` : 'Not available yet'}
-            subtitle={settings.quietHours ? undefined : 'Use your phone’s Focus or Do Not Disturb for now'}
+            value={settings.quietHours ? `${formatHhmm(settings.quietHours.start)}–${formatHhmm(settings.quietHours.end)}` : undefined}
+            subtitle={settings.quietHours ? undefined : 'Not available yet. Use your phone’s Focus or Do Not Disturb for now.'}
           />
         </ListGroup>
       </View>
