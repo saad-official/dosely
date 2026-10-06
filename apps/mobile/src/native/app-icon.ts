@@ -69,6 +69,10 @@ async function flushPendingIcon(): Promise<void> {
 
 /** Switches the icon now on iOS; on Android, the next time the app goes to the background. */
 export async function applyAppIconWhenIdle(themeId: ThemeId): Promise<{ changed: boolean; deferred: boolean }> {
+  if (!androidIconSwitchingAvailable()) {
+    console.info('[app-icon] icon switching is disabled in Android development builds (use a preview/production build to test it)');
+    return { changed: false, deferred: false };
+  }
   if (Platform.OS !== 'android') {
     const r = await applyAppIcon(themeId);
     return { ...r, deferred: false };
@@ -89,4 +93,14 @@ export async function applyAppIconWhenIdle(themeId: ThemeId): Promise<{ changed:
     });
   }
   return { changed: false, deferred: true };
+}
+
+/**
+ * Development builds launch the app through expo-dev-launcher, which starts `MainActivity` by its
+ * explicit class name. With an alternate icon active that activity is disabled, so the dev client
+ * crashes with ActivityNotFoundException on the next launch. Icon switching is therefore skipped
+ * in Android development builds; production builds (and iOS) switch normally.
+ */
+export function androidIconSwitchingAvailable(): boolean {
+  return !(Platform.OS === 'android' && __DEV__);
 }
